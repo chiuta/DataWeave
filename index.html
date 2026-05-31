@@ -1,0 +1,2233 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DataWeave — atelier de date offline</title>
+<meta name="description" content="Drag a CSV or JSON into the page and get instant interactive charts, pivot tables and descriptive statistics. No server, no account, no telemetry. One HTML file.">
+<meta name="author" content="A.I. Chiuță — chiuta.github.io">
+<meta property="og:title" content="DataWeave — offline data atelier">
+<meta property="og:description" content="Interactive charts, pivot tables and statistics for CSV/JSON, entirely in your browser. One file, forever free.">
+<style>
+  :root{
+    --paper:#f4efe6; --paper-2:#ece5d8; --ink:#1c1a16; --ink-soft:#48433a;
+    --line:#d8cfbd; --line-strong:#bcae93; --accent:#9a3b1f; --accent-2:#1f5e57;
+    --gold:#b07d2b; --card:#fbf8f1; --shadow:rgba(40,32,16,.12);
+    --good:#2f6d4f; --warn:#9a6a17; --bad:#9a2b1f;
+    --c1:#9a3b1f;--c2:#1f5e57;--c3:#b07d2b;--c4:#3a5a8c;--c5:#7a4b8c;--c6:#5c7a2e;--c7:#a85c2e;--c8:#2e7a74;
+    --serif:Georgia,'Iowan Old Style','Times New Roman',serif;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --mono:ui-monospace,'SF Mono','Cascadia Code',Menlo,Consolas,monospace;
+    --r:10px;
+  }
+  html[data-theme="dark"]{
+    --paper:#16140f; --paper-2:#211d15; --ink:#f3ecda; --ink-soft:#c7bca2;
+    --line:#3c3527; --line-strong:#5a513c; --accent:#ec865c; --accent-2:#6cccbd;
+    --gold:#e0ad58; --card:#211c15; --shadow:rgba(0,0,0,.5);
+    --good:#74cda2;--warn:#e0ad58;--bad:#ec865c;
+    --c1:#ec865c;--c2:#6cccbd;--c3:#e0ad58;--c4:#8aaee6;--c5:#c9a0dc;--c6:#a9d06a;--c7:#eaa676;--c8:#6cd0c8;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper); color:var(--ink); font-family:var(--sans);
+    font-size:15px; line-height:1.5; min-height:100vh;
+    background-image:radial-gradient(var(--line) .5px,transparent .5px);
+    background-size:22px 22px;
+  }
+  a{color:var(--accent)}
+  .wrap{max-width:1280px;margin:0 auto;padding:0 22px 90px}
+  header.top{
+    display:flex;align-items:flex-end;justify-content:space-between;gap:18px;
+    padding:26px 0 18px;border-bottom:2px solid var(--ink);flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:baseline;gap:14px}
+  .logo{font-family:var(--serif);font-size:40px;font-weight:700;letter-spacing:-.02em;line-height:.9}
+  .logo .w{color:var(--accent)}
+  .tag{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);max-width:380px}
+  .ctrls{display:flex;gap:8px;align-items:center}
+  .btn{
+    font-family:var(--mono);font-size:12px;letter-spacing:.04em;cursor:pointer;
+    background:var(--card);color:var(--ink);border:1px solid var(--line-strong);
+    padding:8px 12px;border-radius:var(--r);transition:.15s;text-transform:uppercase;
+  }
+  .btn:hover{border-color:var(--ink);transform:translateY(-1px)}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .btn.ghost{background:transparent}
+  .btn[disabled]{opacity:.4;cursor:not-allowed;transform:none}
+  .btn.sm{padding:5px 9px;font-size:11px}
+  /* high-contrast native selects (fixes washed-out dropdown options) */
+  select.btn,#langSel{background:var(--card);color:var(--ink);-webkit-appearance:menulist;appearance:menulist}
+  select.btn option,#langSel option,select option{background:var(--card);color:var(--ink)}
+  select{color:var(--ink);background:var(--paper)}
+  select option{background:var(--card);color:var(--ink)}
+  /* accessibility: visible keyboard focus */
+  a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-visible,.tab:focus-visible,.chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+
+  /* DROP ZONE */
+  .drop{
+    margin:34px 0;border:2px dashed var(--line-strong);border-radius:18px;
+    padding:54px 26px;text-align:center;background:var(--card);transition:.18s;position:relative;overflow:hidden;
+  }
+  .drop.drag{border-color:var(--accent);background:var(--paper-2);transform:scale(1.005)}
+  .drop h2{font-family:var(--serif);font-size:30px;margin:0 0 6px;font-weight:700}
+  .drop p{color:var(--ink-soft);margin:4px 0 18px}
+  .drop .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .samples{margin-top:22px;font-size:13px;color:var(--ink-soft)}
+  .samples b{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:8px}
+  .chip{
+    display:inline-block;font-family:var(--mono);font-size:12px;background:var(--paper-2);
+    border:1px solid var(--line);border-radius:30px;padding:5px 12px;margin:3px;cursor:pointer;transition:.15s;
+  }
+  .chip:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* PASTE */
+  .paste{margin:18px 0;display:none}
+  .paste textarea{
+    width:100%;min-height:140px;font-family:var(--mono);font-size:13px;padding:12px;
+    border:1px solid var(--line-strong);border-radius:var(--r);background:var(--card);color:var(--ink);resize:vertical;
+  }
+
+  /* TABS */
+  .app{display:none}
+  .meta-bar{
+    display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin:24px 0 14px;
+    padding:12px 16px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  }
+  .meta-bar .file{font-family:var(--serif);font-size:18px;font-weight:700}
+  .meta-bar .pill{font-family:var(--mono);font-size:11px;color:var(--ink-soft);background:var(--paper-2);padding:4px 9px;border-radius:20px;border:1px solid var(--line)}
+  .meta-bar .spacer{flex:1}
+  .tabs{display:flex;gap:2px;border-bottom:2px solid var(--ink);margin-bottom:22px;flex-wrap:wrap}
+  .tab{
+    font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+    padding:11px 18px;cursor:pointer;border:2px solid transparent;border-bottom:none;
+    border-radius:8px 8px 0 0;margin-bottom:-2px;color:var(--ink-soft);transition:.15s;
+  }
+  .tab:hover{color:var(--ink)}
+  .tab.active{background:var(--card);border-color:var(--ink);color:var(--accent);font-weight:700}
+  .panel{display:none}
+  .panel.active{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* TABLE */
+  .table-tools{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+  .datatools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;padding:9px 12px;background:var(--card);border:1px solid var(--line);border-radius:var(--r)}
+  .dt-title{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin-right:4px}
+  .colform{display:none;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px;padding:12px 14px;background:var(--paper-2);border:1px dashed var(--line-strong);border-radius:var(--r)}
+  .colform.show{display:flex}
+  .colform input{font-family:var(--mono);font-size:13px;padding:7px 10px;border:1px solid var(--line-strong);border-radius:8px;background:var(--card);color:var(--ink)}
+  .colform #cfFormula{flex:1;min-width:240px}
+  .cf-hint{flex-basis:100%;font-size:11px;color:var(--ink-soft);font-style:italic}
+  .colmgr{display:none;margin-bottom:12px;padding:12px 14px;background:var(--paper-2);border:1px dashed var(--line-strong);border-radius:var(--r)}
+  .colmgr.show{display:block}
+  .cm-title{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px}
+  .cm-list{display:flex;flex-direction:column;gap:5px;max-height:300px;overflow:auto}
+  .cm-row{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:5px 9px}
+  .cm-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);flex:none}
+  .cm-row .cm-name{flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cm-row.hiddencol .cm-name{opacity:.45;text-decoration:line-through}
+  .cm-row .cm-ty{font-family:var(--mono);font-size:9px;color:var(--ink-soft);background:var(--paper-2);padding:2px 6px;border-radius:10px;border:1px solid var(--line)}
+  .cm-mv{font-family:var(--mono);font-size:13px;line-height:1;padding:4px 8px;cursor:pointer;background:var(--paper-2);border:1px solid var(--line);border-radius:6px}
+  .cm-mv:hover{border-color:var(--accent);color:var(--accent)}
+  th.dragging{opacity:.4}
+  th.dragover{box-shadow:inset 3px 0 0 var(--accent)}
+  .modal-bg{display:none;position:fixed;inset:0;background:rgba(10,8,4,.55);z-index:60;align-items:flex-start;justify-content:center;padding:5vh 16px;overflow:auto}
+  .modal-bg.show{display:flex;animation:fade .2s ease}
+  .modal{background:var(--card);border:1px solid var(--line-strong);border-radius:16px;max-width:560px;width:100%;padding:28px 30px;position:relative;box-shadow:0 24px 70px var(--shadow)}
+  .modal-x{position:absolute;top:12px;right:14px;background:none;border:none;font-size:26px;line-height:1;color:var(--ink-soft);cursor:pointer}
+  .modal-x:hover{color:var(--accent)}
+  .modal-h{font-family:var(--serif);font-size:28px;margin:0 0 16px;font-weight:700}
+  .modal-sec{margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+  .modal-sec:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+  .modal-sec h3{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin:0 0 7px}
+  .modal-sec p{margin:0 0 8px;font-size:14px;line-height:1.55}
+  .support-links{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+  .slink{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:30px;font-family:var(--mono);font-size:13px;text-decoration:none;font-weight:700;transition:.15s;border:1px solid transparent}
+  .slink:hover{transform:translateY(-2px)}
+  .slink.patreon{background:#000;color:#fff}
+  html[data-theme="dark"] .slink.patreon{background:#fff;color:#000}
+  .slink.bmc{background:#ffdd00;color:#000}
+  .slink.patreon::before{content:"♥";font-size:12px}
+  .slink.bmc::before{content:"☕"}
+  .table-tools input[type=text]{
+    font-family:var(--mono);font-size:13px;padding:8px 11px;border:1px solid var(--line-strong);
+    border-radius:var(--r);background:var(--card);color:var(--ink);min-width:220px;
+  }
+  .tbl-scroll{overflow:auto;border:1px solid var(--line);border-radius:var(--r);max-height:62vh;background:var(--card)}
+  table{border-collapse:collapse;width:100%;font-size:13px}
+  th,td{padding:7px 11px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{
+    position:sticky;top:0;background:var(--paper-2);font-family:var(--mono);font-size:11px;
+    text-transform:uppercase;letter-spacing:.05em;cursor:pointer;user-select:none;z-index:2;border-bottom:2px solid var(--line-strong);
+  }
+  th:hover{color:var(--accent)}
+  th .ty{display:block;font-size:9px;color:var(--ink-soft);font-weight:400;letter-spacing:.1em}
+  td.num{text-align:right;font-family:var(--mono)}
+  tbody tr:hover{background:var(--paper-2)}
+  td.miss{color:var(--line-strong);font-style:italic}
+  .rownum{color:var(--ink-soft);font-family:var(--mono);font-size:11px;text-align:right}
+
+  /* STATS */
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+  .stat-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:15px 17px;border-left:4px solid var(--accent)}
+  .stat-card.cat{border-left-color:var(--accent-2)}
+  .stat-card h3{margin:0 0 3px;font-family:var(--mono);font-size:13px;letter-spacing:.03em;display:flex;justify-content:space-between;align-items:center}
+  .stat-card .ty2{font-size:9px;background:var(--paper-2);padding:2px 7px;border-radius:20px;color:var(--ink-soft);letter-spacing:.1em;border:1px solid var(--line)}
+  .stat-rows{display:grid;grid-template-columns:1fr auto;gap:2px 14px;margin-top:9px;font-size:13px}
+  .stat-rows .k{color:var(--ink-soft)}
+  .stat-rows .v{font-family:var(--mono);text-align:right}
+  .spark{margin-top:11px;height:42px;width:100%}
+  .topvals{margin-top:9px;font-size:12px}
+  .topvals .bar{display:grid;grid-template-columns:90px 1fr auto;gap:8px;align-items:center;margin:3px 0}
+  .topvals .lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--mono);font-size:11px}
+  .topvals .track{height:9px;background:var(--paper-2);border-radius:5px;overflow:hidden}
+  .topvals .fill{height:100%;background:var(--accent-2);border-radius:5px}
+  .topvals .ct{font-family:var(--mono);font-size:11px;color:var(--ink-soft)}
+
+  /* CONTROLS GENERIC */
+  .controls{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:18px;
+    background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px}
+  .field{display:flex;flex-direction:column;gap:5px}
+  .field label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+  select,.field input{
+    font-family:var(--mono);font-size:13px;padding:7px 10px;border:1px solid var(--line-strong);
+    border-radius:8px;background:var(--paper);color:var(--ink);min-width:140px;
+  }
+  .chart-area{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;overflow:auto;position:relative}
+  .chart-area svg{display:block;margin:0 auto;max-width:100%;height:auto}
+  .chart-title{font-family:var(--serif);font-size:20px;text-align:center;margin:0 0 4px}
+  .empty-note{color:var(--ink-soft);text-align:center;padding:48px 16px;font-style:italic}
+  .export-row{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}
+
+  /* FILTER BAR */
+  .filterbar{margin:0 0 16px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:11px 14px}
+  .filterbar .fhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .filterbar .ftitle{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+  .filterbar select,.filterbar input{min-width:auto;padding:6px 9px;font-size:12px}
+  .filterbar input{min-width:120px}
+  .fchips{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+  .fchip{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;background:var(--paper-2);
+    border:1px solid var(--line-strong);border-radius:30px;padding:4px 6px 4px 12px}
+  .fchip b{color:var(--accent)}
+  .fchip .x{cursor:pointer;width:16px;height:16px;line-height:14px;text-align:center;border-radius:50%;background:var(--line);color:var(--ink)}
+  .fchip .x:hover{background:var(--accent);color:#fff}
+  .field.chk{flex-direction:row;align-items:center;gap:7px;padding-bottom:5px}
+  .field.chk input{min-width:auto;width:16px;height:16px;accent-color:var(--accent)}
+  .field.chk label{text-transform:none;letter-spacing:.02em;font-size:12px}
+  .ty-sel{font-family:var(--mono);font-size:9px;letter-spacing:.06em;padding:1px 3px;margin-top:2px;border:1px solid var(--line);
+    border-radius:5px;background:var(--paper);color:var(--ink-soft);min-width:auto;cursor:pointer}
+  .reg-note{font-family:var(--mono);font-size:12px;color:var(--ink-soft);text-align:center;margin-top:8px}
+  .reg-note b{color:var(--accent)}
+
+  /* PIVOT */
+  .pivot-out{margin-top:18px;overflow:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
+  .pivot-out table th{cursor:default}
+  .pivot-out td.gtot,.pivot-out th.gtot{background:var(--paper-2);font-weight:700}
+
+  footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--ink-soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  footer .mono{font-family:var(--mono)}
+  .hint{font-size:12px;color:var(--ink-soft);font-style:italic}
+  ::selection{background:var(--accent);color:#fff}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:var(--paper);
+    font-family:var(--mono);font-size:12px;padding:10px 18px;border-radius:30px;transition:.3s;z-index:50;opacity:0}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+  @media(max-width:820px){
+    .wrap{padding:0 14px 80px}
+    .controls{padding:12px;gap:10px}
+    .controls .field{flex:1 1 calc(50% - 5px)}
+    .controls select,.field input{min-width:0;width:100%}
+    .tabs{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
+    .tab{white-space:nowrap}
+    .meta-bar{gap:8px;padding:10px 12px}
+    .meta-bar .spacer{flex-basis:100%;height:0}
+    .filterbar .fhead{flex-wrap:wrap}
+    .filterbar select,.filterbar input{flex:1 1 calc(50% - 6px);min-width:0}
+  }
+  @media(max-width:560px){
+    body{font-size:14px}
+    .logo{font-size:26px}.tag{display:none}
+    header.top{padding:18px 0 14px}
+    .ctrls{gap:6px;flex-wrap:wrap}
+    .btn{padding:7px 9px;font-size:11px}
+    .drop{padding:32px 14px;margin:22px 0}.drop h2{font-size:22px}
+    .controls .field{flex:1 1 100%}
+    .stat-grid{grid-template-columns:1fr}
+    .datatools{gap:6px}
+    .table-tools{gap:7px}.table-tools input[type=text]{flex:1 1 100%;min-width:0}
+    .table-tools .hint{display:none}
+    th,td{padding:6px 8px;font-size:12px}
+    .modal{padding:22px 18px;border-radius:14px}.modal-h{font-size:23px}
+    .meta-bar .file{font-size:16px}
+    .export-row{justify-content:stretch}.export-row .btn{flex:1}
+    #langSel{max-width:120px}
+  }
+  @media(hover:none){.btn,.tab,.cm-mv,.chip{min-height:38px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="logo">Data<span class="w">Weave</span></div>
+      <div class="tag" data-i18n="tagline">vizualizare de date · 100% în browser · zero telemetrie</div>
+    </div>
+    <div class="ctrls">
+      <select class="btn ghost" id="langSel" title="Language" style="padding-right:8px">
+        <option value="en">English</option>
+        <option value="ro">Română</option>
+        <option value="fr">Français</option>
+        <option value="it">Italiano</option>
+        <option value="es">Español</option>
+        <option value="pt">Português</option>
+        <option value="de">Deutsch</option>
+      </select>
+      <button class="btn ghost" id="themeBtn">☾</button>
+      <button class="btn ghost" id="aboutBtn" data-i18n="about" title="About">Despre</button>
+      <button class="btn" id="newBtn" data-i18n="newData" style="display:none">Date noi</button>
+    </div>
+  </header>
+
+  <!-- INTAKE -->
+  <section id="intake">
+    <div class="drop" id="drop">
+      <h2 data-i18n="dropTitle">Trage un fișier aici</h2>
+      <p data-i18n="dropSub">CSV · TSV · JSON — nimic nu părăsește dispozitivul tău</p>
+      <div class="row">
+        <button class="btn primary" id="fileBtn" data-i18n="chooseFile">Alege fișier</button>
+        <button class="btn" id="pasteBtn" data-i18n="pasteData">Lipește date</button>
+      </div>
+      <input type="file" id="fileInput" accept=".csv,.tsv,.txt,.json" style="display:none">
+      <div class="samples">
+        <b data-i18n="orTry">sau încearcă un set demonstrativ</b>
+        <span class="chip" data-sample="iris">🌸 Iris (flori)</span>
+        <span class="chip" data-sample="cities">🏙️ Orașe Europa</span>
+        <span class="chip" data-sample="sales">📈 Vânzări lunare</span>
+      </div>
+    </div>
+    <div class="paste" id="pasteWrap">
+      <textarea id="pasteArea" placeholder="nume,varsta,oras&#10;Ana,29,Cluj&#10;Bogdan,34,Iasi"></textarea>
+      <div class="export-row"><button class="btn primary" id="pasteLoad" data-i18n="loadPaste">Încarcă</button></div>
+    </div>
+  </section>
+
+  <!-- APP -->
+  <section class="app" id="app">
+    <div class="meta-bar">
+      <span class="file" id="fileName">data.csv</span>
+      <span class="pill" id="rowCount">0 rânduri</span>
+      <span class="pill" id="colCount">0 coloane</span>
+      <span class="pill" id="delimInfo"></span>
+      <span class="pill" id="activePill" style="display:none"></span>
+      <span class="spacer"></span>
+      <button class="btn sm ghost" id="saveSession" data-i18n="saveSession">Salvează sesiune</button>
+      <button class="btn sm ghost" id="loadSession" data-i18n="loadSession">Încarcă sesiune</button>
+      <input type="file" id="sessionInput" accept=".json" style="display:none">
+      <button class="btn sm" id="exportStats" data-i18n="exportStats">Export statistici</button>
+      <button class="btn sm" id="exportJson" data-i18n="exportJson">Export JSON</button>
+      <button class="btn sm" id="exportClean" data-i18n="exportCsv">Export CSV</button>
+    </div>
+
+    <div class="filterbar">
+      <div class="fhead">
+        <span class="ftitle" data-i18n="filters">Filtre</span>
+        <select id="flCol"></select>
+        <select id="flOp"></select>
+        <input type="text" id="flVal" data-i18n-ph="filterValPh" placeholder="valoare…">
+        <button class="btn sm" id="flAdd" data-i18n="addFilter">+ Adaugă</button>
+        <button class="btn sm ghost" id="flClear" data-i18n="clearAll" style="display:none">Șterge tot</button>
+      </div>
+      <div class="fchips" id="flChips"></div>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <div class="tab active" data-tab="table" data-i18n="tabTable">Tabel</div>
+      <div class="tab" data-tab="stats" data-i18n="tabStats">Statistici</div>
+      <div class="tab" data-tab="chart" data-i18n="tabChart">Grafice</div>
+      <div class="tab" data-tab="pivot" data-i18n="tabPivot">Pivot</div>
+      <div class="tab" data-tab="corr" data-i18n="tabCorr">Corelații</div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="panel active" id="panel-table">
+      <div class="datatools">
+        <span class="dt-title" data-i18n="dataTools">Unelte date</span>
+        <button class="btn sm ghost" id="btnColumns" data-i18n="columnsBtn">Coloane</button>
+        <button class="btn sm ghost" id="btnReset" data-i18n="resetView">Resetează vizualizarea</button>
+        <button class="btn sm ghost" id="btnDedupe" data-i18n="dedupe">Elimină duplicate</button>
+        <button class="btn sm ghost" id="btnTrim" data-i18n="trimWs">Curăță spații</button>
+        <button class="btn sm ghost" id="btnAddCol" data-i18n="addCol">+ Coloană calculată</button>
+      </div>
+      <div class="colmgr" id="colMgr">
+        <div class="cm-title" data-i18n="colMgrTitle">Reordonează și ascunde coloane</div>
+        <div class="cm-list" id="cmList"></div>
+      </div>
+      <div class="colform" id="colForm">
+        <input type="text" id="cfName" data-i18n-ph="colName" placeholder="Nume coloană">
+        <input type="text" id="cfFormula" data-i18n-ph="colFormula" placeholder="Formulă (folosește numele coloanelor)">
+        <button class="btn sm primary" id="cfCreate" data-i18n="create">Creează</button>
+        <button class="btn sm ghost" id="cfCancel" data-i18n="cancel">Renunță</button>
+        <div class="cf-hint" id="cfHint" data-i18n="formulaHint"></div>
+      </div>
+      <div class="table-tools">
+        <input type="text" id="tblSearch" data-i18n-ph="searchPh" placeholder="Caută în toate coloanele…">
+        <span class="pill" id="tblShown"></span>
+        <span class="spacer" style="flex:1"></span>
+        <span class="hint" data-i18n="clickSort">click pe antet pentru sortare</span>
+      </div>
+      <div class="tbl-scroll"><table id="dataTable"></table></div>
+    </div>
+
+    <!-- STATS -->
+    <div class="panel" id="panel-stats">
+      <div class="stat-grid" id="statGrid"></div>
+    </div>
+
+    <!-- CHART -->
+    <div class="panel" id="panel-chart">
+      <div class="controls">
+        <div class="field">
+          <label data-i18n="chartType">Tip grafic</label>
+          <select id="chType">
+            <option value="bar" data-i18n="tBar">Bare</option>
+            <option value="line" data-i18n="tLine">Linie</option>
+            <option value="scatter" data-i18n="tScatter">Scatter</option>
+            <option value="hist" data-i18n="tHist">Histogramă</option>
+            <option value="box" data-i18n="tBox">Box-plot</option>
+            <option value="heat" data-i18n="tHeat">Heatmap</option>
+            <option value="pie" data-i18n="tPie">Plăcintă</option>
+          </select>
+        </div>
+        <div class="field" id="fX"><label data-i18n="axisX">Axă X / Categorie</label><select id="chX"></select></div>
+        <div class="field" id="fY"><label data-i18n="axisY">Axă Y / Valoare</label><select id="chY"></select></div>
+        <div class="field" id="fAgg"><label data-i18n="agg">Agregare</label>
+          <select id="chAgg">
+            <option value="sum" data-i18n="aSum">Sumă</option>
+            <option value="mean" data-i18n="aMean">Medie</option>
+            <option value="median" data-i18n="aMedian">Mediană</option>
+            <option value="count" data-i18n="aCount">Număr</option>
+            <option value="min">Min</option>
+            <option value="max">Max</option>
+            <option value="std" data-i18n="aStd">Dev. std</option>
+          </select>
+        </div>
+        <div class="field" id="fColor"><label data-i18n="colorBy">Culoare după</label><select id="chColor"></select></div>
+        <div class="field" id="fBins"><label data-i18n="bins">Intervale</label><span style="display:flex;gap:6px"><input type="number" id="chBins" value="12" min="2" max="60" style="min-width:70px"><button class="btn sm ghost" id="binsAuto" data-i18n="autoBins" title="Freedman–Diaconis">auto</button></span></div>
+        <div class="field" id="fTopN"><label data-i18n="topN">Top-N</label><input type="number" id="chTopN" value="20" min="1" max="100" style="min-width:80px"></div>
+        <div class="field chk" id="fHoriz"><input type="checkbox" id="chHoriz"><label data-i18n="horiz">Orizontal</label></div>
+        <div class="field chk" id="fLabels"><input type="checkbox" id="chLabels"><label data-i18n="valLabels">Etichete valori</label></div>
+        <div class="field chk" id="fStack"><input type="checkbox" id="chStack" checked><label data-i18n="stacked">Stivuit</label></div>
+        <div class="field chk" id="fTrend"><input type="checkbox" id="chTrend" checked><label data-i18n="trend">Linie de regresie</label></div>
+        <div class="field" id="fFit"><label data-i18n="fitType">Potrivire</label>
+          <select id="chFit">
+            <option value="linear" data-i18n="fitLin">Liniară</option>
+            <option value="log" data-i18n="fitLog">Logaritmică</option>
+            <option value="exp" data-i18n="fitExp">Exponențială</option>
+            <option value="pow" data-i18n="fitPow">Putere</option>
+            <option value="poly2" data-i18n="fitPoly2">Polinomială (grad 2)</option>
+            <option value="poly3" data-i18n="fitPoly3">Polinomială (grad 3)</option>
+          </select>
+        </div>
+        <div class="field chk" id="fCI"><input type="checkbox" id="chCI"><label data-i18n="ciBand">Interval de încredere</label></div>
+        <div class="field chk" id="fPI"><input type="checkbox" id="chPI"><label data-i18n="piBand">Interval de predicție</label></div>
+        <div class="field" id="fConf"><label data-i18n="confLevel">Nivel de încredere</label>
+          <select id="chConf"><option value="90">90%</option><option value="95" selected>95%</option><option value="99">99%</option></select>
+        </div>
+        <div class="field chk" id="fNorm"><input type="checkbox" id="chNorm"><label data-i18n="showNormal">Curbă normală</label></div>
+        <div class="field chk" id="fMeanMed"><input type="checkbox" id="chMeanMed" checked><label data-i18n="showMeanMed">Medie/mediană</label></div>
+        <div class="field chk" id="fMA"><input type="checkbox" id="chMA"><label data-i18n="movAvg">Medie mobilă</label></div>
+        <div class="field" id="fMAWin"><label data-i18n="maWin">Fereastră</label><input type="number" id="chMAWin" value="3" min="2" max="50" style="min-width:70px"></div>
+      </div>
+      <div class="chart-area"><div id="chartHolder"></div></div>
+      <div class="export-row">
+        <button class="btn sm" id="dlChartData" data-i18n="exportChartData">Date grafic CSV</button>
+        <button class="btn sm" id="dlSvg">⬇ SVG</button>
+        <button class="btn sm" id="dlPng">⬇ PNG</button>
+      </div>
+    </div>
+
+    <!-- PIVOT -->
+    <div class="panel" id="panel-pivot">
+      <div class="controls">
+        <div class="field"><label data-i18n="pvRows">Rânduri (grupare)</label><select id="pvRow"></select></div>
+        <div class="field"><label data-i18n="pvCols">Coloane (opțional)</label><select id="pvCol"></select></div>
+        <div class="field"><label data-i18n="pvVal">Valoare</label><select id="pvVal"></select></div>
+        <div class="field"><label data-i18n="agg">Agregare</label>
+          <select id="pvAgg">
+            <option value="sum" data-i18n="aSum">Sumă</option>
+            <option value="mean" data-i18n="aMean">Medie</option>
+            <option value="median" data-i18n="aMedian">Mediană</option>
+            <option value="count" data-i18n="aCount">Număr</option>
+            <option value="min">Min</option>
+            <option value="max">Max</option>
+            <option value="std" data-i18n="aStd">Dev. std</option>
+          </select>
+        </div>
+      </div>
+      <div class="pivot-out" id="pivotOut"></div>
+      <div class="export-row"><button class="btn sm" id="dlPivot" data-i18n="exportCsv">Export CSV</button></div>
+    </div>
+
+    <!-- CORR -->
+    <div class="panel" id="panel-corr">
+      <div class="controls" style="margin-bottom:14px">
+        <div class="field"><label data-i18n="corrMethod">Metodă</label>
+          <select id="corrMethodSel">
+            <option value="pearson" data-i18n="mPearson">Pearson</option>
+            <option value="spearman" data-i18n="mSpearman">Spearman</option>
+          </select>
+        </div>
+        <p class="hint" data-i18n="corrNote" style="align-self:center;flex:1;min-width:200px">Matricea de corelație Pearson între coloanele numerice.</p>
+      </div>
+      <div class="chart-area"><div id="corrHolder"></div></div>
+      <div class="export-row">
+        <button class="btn sm" id="dlCorrSvg">⬇ SVG</button>
+        <button class="btn sm" id="dlCorrPng">⬇ PNG</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span class="mono">DataWeave · single-file · <span id="ver">v7.1</span></span>
+    <span data-i18n="footRight">Construit pentru jurnaliști, cercetători și profesori. Datele rămân la tine.</span>
+  </footer>
+</div>
+<div class="toast" id="toast"></div>
+<div class="modal-bg" id="aboutModal">
+  <div class="modal">
+    <button class="modal-x" id="aboutClose" aria-label="close">×</button>
+    <h2 class="modal-h" data-i18n="aboutTitle">Despre DataWeave</h2>
+    <div class="modal-sec">
+      <h3 data-i18n="authorH">Autorul</h3>
+      <p data-i18n="authorBody"></p>
+      <p><a id="lnkSite" href="https://chiuta.github.io" target="_blank" rel="noopener" data-i18n="visitSite">Site web</a>
+         &nbsp;·&nbsp; <a id="lnkMail" href="mailto:alexio@trom.tf" data-i18n="contact">Contact</a></p>
+    </div>
+    <div class="modal-sec">
+      <h3 data-i18n="tradeFreeH">Trade-free</h3>
+      <p data-i18n="tradeFreeBody"></p>
+    </div>
+    <div class="modal-sec">
+      <h3 data-i18n="supportH">Susține proiectul</h3>
+      <p data-i18n="supportBody"></p>
+      <div class="support-links">
+        <a class="slink patreon" id="lnkPatreon" href="https://www.patreon.com/c/alexio_tf" target="_blank" rel="noopener" data-i18n="patreon">Patreon</a>
+        <a class="slink bmc" id="lnkBMC" href="https://buymeacoffee.com/echo.of.the.strings" target="_blank" rel="noopener" data-i18n="bmc">Buy Me a Coffee</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ========================== i18n ========================== */
+const I18N = {
+  ro:{
+    tagline:"vizualizare de date · 100% în browser · zero telemetrie",
+    newData:"Date noi", dropTitle:"Trage un fișier aici",
+    dropSub:"CSV · TSV · JSON — nimic nu părăsește dispozitivul tău",
+    chooseFile:"Alege fișier", pasteData:"Lipește date", orTry:"sau încearcă un set demonstrativ",
+    loadPaste:"Încarcă", exportCsv:"Export CSV",
+    tabTable:"Tabel", tabStats:"Statistici", tabChart:"Grafice", tabPivot:"Pivot", tabCorr:"Corelații",
+    searchPh:"Caută în toate coloanele…", clickSort:"click pe antet pentru sortare",
+    chartType:"Tip grafic", tBar:"Bare", tLine:"Linie", tScatter:"Scatter", tHist:"Histogramă", tPie:"Plăcintă",
+    axisX:"Axă X / Categorie", axisY:"Axă Y / Valoare", agg:"Agregare",
+    aSum:"Sumă", aMean:"Medie", aCount:"Număr", colorBy:"Culoare după", bins:"Intervale",
+    pvRows:"Rânduri (grupare)", pvCols:"Coloane (opțional)", pvVal:"Valoare",
+    corrNote:"Matricea de corelație Pearson între coloanele numerice.",
+    corrMethod:"Metodă", mPearson:"Pearson", mSpearman:"Spearman", resetView:"Resetează vizualizarea",
+    footRight:"Construit pentru jurnaliști, cercetători și profesori. Datele rămân la tine.",
+    none:"(niciuna)", count:"număr", total:"Total general",
+    rows:n=>n+" rânduri", cols:n=>n+" coloane", shown:(a,b)=>a+" din "+b+" afișate",
+    statN:"n (valori)", statMiss:"lipsă", statUniq:"unice", statMean:"medie", statMedian:"mediană",
+    statStd:"dev. std", statMin:"min", statMax:"max", statSum:"sumă", statQ1:"cuartila 1", statQ3:"cuartila 3",
+    statRange:"amplitudine", statCV:"coef. variație", statSkew:"asimetrie", piBand:"Interval de predicție", autoBins:"auto",
+    statTop:"valori frecvente", needNum:"Selectează cel puțin o coloană numerică.",
+    needTwoNum:"Sunt necesare cel puțin 2 coloane numerice pentru corelație.",
+    pickFields:"Alege câmpurile pentru a genera graficul.",
+    copied:"Copiat în clipboard", loaded:"Date încărcate", parseErr:"Nu am putut interpreta fișierul.",
+    typeNum:"numeric", typeStr:"text", typeDate:"dată", typeBool:"boolean",
+    dl:"Descărcat",
+    filters:"Filtre", addFilter:"+ Adaugă", clearAll:"Șterge tot", filterValPh:"valoare…",
+    tBox:"Box-plot", tHeat:"Heatmap", aMedian:"Mediană", aStd:"Dev. std",
+    topN:"Top-N", horiz:"Orizontal", valLabels:"Etichete valori", stacked:"Stivuit", trend:"Linie de regresie",
+    activeRows:(a,b)=>a+" din "+b+" (filtrate)", regEq:"ecuație", needTwoNumChart:"Heatmap/box necesită câmpurile potrivite.",
+    opContains:"conține", opEq:"=", opNe:"≠", opGt:">", opLt:"<", opGe:"≥", opLe:"≤", opStarts:"începe cu",
+    fitType:"Potrivire", fitNone:"—", fitLin:"Liniară", fitLog:"Logaritmică", fitExp:"Exponențială", fitPow:"Putere",
+    overlay:"Suprapuneri", showNormal:"Curbă normală", showMeanMed:"Medie/mediană", movAvg:"Medie mobilă", maWin:"Fereastră",
+    dataTools:"Unelte date", dedupe:"Elimină duplicate", trimWs:"Curăță spații", addCol:"+ Coloană calculată",
+    colName:"Nume coloană", colFormula:"Formulă (folosește numele coloanelor)", create:"Creează", cancel:"Renunță",
+    badFormula:"Formulă invalidă sau fără rezultate numerice.", colAdded:"Coloană adăugată", removed:n=>n+" rânduri eliminate",
+    trimmed:"Spații curățate", exportJson:"Export JSON", exportStats:"Export statistici", exportChartData:"Date grafic CSV",
+    formulaHint:"Operatori: + − × ÷ ( ) și funcții: sqrt, log, abs, round, min, max, pow.",
+    ciBand:"Interval de încredere", groupByHist:"Grupează după",
+    saveSession:"Salvează sesiune", loadSession:"Încarcă sesiune",
+    sessionSaved:"Sesiune salvată", sessionLoaded:"Sesiune restaurată", sessionErr:"Sesiune invalidă pentru aceste date",
+    about:"Despre", aboutTitle:"Despre DataWeave",
+    authorH:"Autorul", authorBody:"DataWeave este realizat de Alexandru-Ionuț Chiuță (Alexio), dezvoltator, autor SF și muzician. Mai multe instrumente cu fișier unic, fără server și fără telemetrie, la chiuta.github.io.",
+    tradeFreeH:"Trade-free", tradeFreeBody:"Acest instrument este oferit liber, în spiritul mișcării trade-free (TROM): fără reclame, fără conturi, fără urmărire. Datele tale nu părăsesc niciodată dispozitivul.",
+    supportH:"Susține proiectul", supportBody:"Dacă îți este de folos și vrei să susții munca, o poți face aici:",
+    patreon:"Patreon", bmc:"Buy Me a Coffee", contact:"Contact", visitSite:"Site web", closeLbl:"Închide",
+    columnsBtn:"Coloane", colMgrTitle:"Reordonează și ascunde coloane", confLevel:"Nivel de încredere",
+    fitPoly2:"Polinomială (grad 2)", fitPoly3:"Polinomială (grad 3)", dragHint:"trage anteturile pentru a reordona"
+  },
+  en:{
+    tagline:"data visualization · 100% in browser · zero telemetry",
+    newData:"New data", dropTitle:"Drop a file here",
+    dropSub:"CSV · TSV · JSON — nothing leaves your device",
+    chooseFile:"Choose file", pasteData:"Paste data", orTry:"or try a demo dataset",
+    loadPaste:"Load", exportCsv:"Export CSV",
+    tabTable:"Table", tabStats:"Statistics", tabChart:"Charts", tabPivot:"Pivot", tabCorr:"Correlations",
+    searchPh:"Search all columns…", clickSort:"click a header to sort",
+    chartType:"Chart type", tBar:"Bar", tLine:"Line", tScatter:"Scatter", tHist:"Histogram", tPie:"Pie",
+    axisX:"X axis / Category", axisY:"Y axis / Value", agg:"Aggregate",
+    aSum:"Sum", aMean:"Mean", aCount:"Count", colorBy:"Color by", bins:"Bins",
+    pvRows:"Rows (group by)", pvCols:"Columns (optional)", pvVal:"Value",
+    corrNote:"Pearson correlation matrix across numeric columns.",
+    corrMethod:"Method", mPearson:"Pearson", mSpearman:"Spearman", resetView:"Reset view",
+    footRight:"Built for journalists, researchers and teachers. Your data stays with you.",
+    none:"(none)", count:"count", total:"Grand total",
+    rows:n=>n+" rows", cols:n=>n+" columns", shown:(a,b)=>a+" of "+b+" shown",
+    statN:"n (values)", statMiss:"missing", statUniq:"unique", statMean:"mean", statMedian:"median",
+    statStd:"std dev", statMin:"min", statMax:"max", statSum:"sum", statQ1:"Q1", statQ3:"Q3",
+    statRange:"range", statCV:"coef. of variation", statSkew:"skewness", piBand:"Prediction interval", autoBins:"auto",
+    statTop:"frequent values", needNum:"Select at least one numeric column.",
+    needTwoNum:"At least 2 numeric columns are needed for correlation.",
+    pickFields:"Choose fields to render the chart.",
+    copied:"Copied to clipboard", loaded:"Data loaded", parseErr:"Could not parse the file.",
+    typeNum:"numeric", typeStr:"text", typeDate:"date", typeBool:"boolean",
+    dl:"Downloaded",
+    filters:"Filters", addFilter:"+ Add", clearAll:"Clear all", filterValPh:"value…",
+    tBox:"Box-plot", tHeat:"Heatmap", aMedian:"Median", aStd:"Std dev",
+    topN:"Top-N", horiz:"Horizontal", valLabels:"Value labels", stacked:"Stacked", trend:"Regression line",
+    activeRows:(a,b)=>a+" of "+b+" (filtered)", regEq:"equation", needTwoNumChart:"Heatmap/box needs the right fields.",
+    opContains:"contains", opEq:"=", opNe:"≠", opGt:">", opLt:"<", opGe:"≥", opLe:"≤", opStarts:"starts with",
+    fitType:"Fit", fitNone:"—", fitLin:"Linear", fitLog:"Logarithmic", fitExp:"Exponential", fitPow:"Power",
+    overlay:"Overlays", showNormal:"Normal curve", showMeanMed:"Mean/median", movAvg:"Moving average", maWin:"Window",
+    dataTools:"Data tools", dedupe:"Remove duplicates", trimWs:"Trim whitespace", addCol:"+ Computed column",
+    colName:"Column name", colFormula:"Formula (use column names)", create:"Create", cancel:"Cancel",
+    badFormula:"Invalid formula or no numeric results.", colAdded:"Column added", removed:n=>n+" rows removed",
+    trimmed:"Whitespace trimmed", exportJson:"Export JSON", exportStats:"Export statistics", exportChartData:"Chart data CSV",
+    formulaHint:"Operators: + − × ÷ ( ) and functions: sqrt, log, abs, round, min, max, pow.",
+    ciBand:"Confidence interval", groupByHist:"Group by",
+    saveSession:"Save session", loadSession:"Load session",
+    sessionSaved:"Session saved", sessionLoaded:"Session restored", sessionErr:"Session invalid for this dataset",
+    about:"About", aboutTitle:"About DataWeave",
+    authorH:"The author", authorBody:"DataWeave is made by Alexandru-Ionuț Chiuță (Alexio), a developer, SF author and musician. More single-file, server-free, telemetry-free tools at chiuta.github.io.",
+    tradeFreeH:"Trade-free", tradeFreeBody:"This tool is offered freely, in the spirit of the trade-free movement (TROM): no ads, no accounts, no tracking. Your data never leaves your device.",
+    supportH:"Support the project", supportBody:"If it is useful to you and you want to support the work, you can do so here:",
+    patreon:"Patreon", bmc:"Buy Me a Coffee", contact:"Contact", visitSite:"Website", closeLbl:"Close",
+    columnsBtn:"Columns", colMgrTitle:"Reorder and hide columns", confLevel:"Confidence level",
+    fitPoly2:"Polynomial (deg 2)", fitPoly3:"Polynomial (deg 3)", dragHint:"drag the headers to reorder"
+  },
+  fr:{
+    tagline:"visualisation de données · 100% dans le navigateur · zéro télémétrie",
+    newData:"Nouvelles données", dropTitle:"Déposez un fichier ici",
+    dropSub:"CSV · TSV · JSON — rien ne quitte votre appareil",
+    chooseFile:"Choisir un fichier", pasteData:"Coller des données", orTry:"ou essayez un jeu de démonstration",
+    loadPaste:"Charger", exportCsv:"Exporter CSV",
+    tabTable:"Tableau", tabStats:"Statistiques", tabChart:"Graphiques", tabPivot:"Pivot", tabCorr:"Corrélations",
+    searchPh:"Rechercher dans toutes les colonnes…", clickSort:"cliquez sur un en-tête pour trier",
+    chartType:"Type de graphique", tBar:"Barres", tLine:"Ligne", tScatter:"Nuage", tHist:"Histogramme", tPie:"Camembert",
+    axisX:"Axe X / Catégorie", axisY:"Axe Y / Valeur", agg:"Agrégation",
+    aSum:"Somme", aMean:"Moyenne", aCount:"Nombre", colorBy:"Couleur par", bins:"Classes",
+    pvRows:"Lignes (regrouper)", pvCols:"Colonnes (facultatif)", pvVal:"Valeur",
+    corrNote:"Matrice de corrélation de Pearson entre les colonnes numériques.",
+    corrMethod:"Méthode", mPearson:"Pearson", mSpearman:"Spearman", resetView:"Réinitialiser la vue",
+    footRight:"Conçu pour les journalistes, chercheurs et enseignants. Vos données restent chez vous.",
+    none:"(aucune)", count:"nombre", total:"Total général",
+    rows:n=>n+" lignes", cols:n=>n+" colonnes", shown:(a,b)=>a+" sur "+b+" affichées",
+    statN:"n (valeurs)", statMiss:"manquants", statUniq:"uniques", statMean:"moyenne", statMedian:"médiane",
+    statStd:"écart-type", statMin:"min", statMax:"max", statSum:"somme", statQ1:"Q1", statQ3:"Q3",
+    statRange:"étendue", statCV:"coef. variation", statSkew:"asymétrie", piBand:"Intervalle de prédiction", autoBins:"auto",
+    statTop:"valeurs fréquentes", needNum:"Sélectionnez au moins une colonne numérique.",
+    needTwoNum:"Au moins 2 colonnes numériques sont nécessaires pour la corrélation.",
+    pickFields:"Choisissez les champs pour générer le graphique.",
+    copied:"Copié dans le presse-papiers", loaded:"Données chargées", parseErr:"Impossible d'interpréter le fichier.",
+    typeNum:"numérique", typeStr:"texte", typeDate:"date", typeBool:"booléen",
+    dl:"Téléchargé", filters:"Filtres", addFilter:"+ Ajouter", clearAll:"Tout effacer", filterValPh:"valeur…",
+    tBox:"Boîte à moustaches", tHeat:"Carte de chaleur", aMedian:"Médiane", aStd:"Écart-type",
+    topN:"Top-N", horiz:"Horizontal", valLabels:"Étiquettes", stacked:"Empilé", trend:"Droite de régression",
+    activeRows:(a,b)=>a+" sur "+b+" (filtrées)", regEq:"équation", needTwoNumChart:"La carte/boîte requiert les bons champs.",
+    opContains:"contient", opEq:"=", opNe:"≠", opGt:">", opLt:"<", opGe:"≥", opLe:"≤", opStarts:"commence par",
+    fitType:"Ajustement", fitNone:"—", fitLin:"Linéaire", fitLog:"Logarithmique", fitExp:"Exponentielle", fitPow:"Puissance",
+    overlay:"Superpositions", showNormal:"Courbe normale", showMeanMed:"Moyenne/médiane", movAvg:"Moyenne mobile", maWin:"Fenêtre",
+    dataTools:"Outils de données", dedupe:"Supprimer doublons", trimWs:"Nettoyer espaces", addCol:"+ Colonne calculée",
+    colName:"Nom de colonne", colFormula:"Formule (utilisez les noms de colonnes)", create:"Créer", cancel:"Annuler",
+    badFormula:"Formule invalide ou sans résultat numérique.", colAdded:"Colonne ajoutée", removed:n=>n+" lignes supprimées",
+    trimmed:"Espaces nettoyés", exportJson:"Exporter JSON", exportStats:"Exporter statistiques", exportChartData:"Données du graphique CSV",
+    formulaHint:"Opérateurs : + − × ÷ ( ) et fonctions : sqrt, log, abs, round, min, max, pow.",
+    ciBand:"Intervalle de confiance", groupByHist:"Grouper par",
+    saveSession:"Enregistrer session", loadSession:"Charger session",
+    sessionSaved:"Session enregistrée", sessionLoaded:"Session restaurée", sessionErr:"Session invalide pour ces données",
+    about:"À propos", aboutTitle:"À propos de DataWeave",
+    authorH:"L'auteur", authorBody:"DataWeave est réalisé par Alexandru-Ionuț Chiuță (Alexio), développeur, auteur de SF et musicien. D'autres outils en fichier unique, sans serveur ni télémétrie sur chiuta.github.io.",
+    tradeFreeH:"Trade-free", tradeFreeBody:"Cet outil est offert librement, dans l'esprit du mouvement trade-free (TROM) : sans publicité, sans compte, sans suivi. Vos données ne quittent jamais votre appareil.",
+    supportH:"Soutenir le projet", supportBody:"S'il vous est utile et que vous souhaitez soutenir le travail, vous pouvez le faire ici :",
+    patreon:"Patreon", bmc:"Buy Me a Coffee", contact:"Contact", visitSite:"Site web", closeLbl:"Fermer",
+    columnsBtn:"Colonnes", colMgrTitle:"Réorganiser et masquer les colonnes", confLevel:"Niveau de confiance",
+    fitPoly2:"Polynomiale (deg 2)", fitPoly3:"Polynomiale (deg 3)", dragHint:"glissez les en-têtes pour réorganiser"
+  },
+  it:{
+    tagline:"visualizzazione dati · 100% nel browser · zero telemetria",
+    newData:"Nuovi dati", dropTitle:"Trascina un file qui",
+    dropSub:"CSV · TSV · JSON — nulla lascia il tuo dispositivo",
+    chooseFile:"Scegli file", pasteData:"Incolla dati", orTry:"oppure prova un set dimostrativo",
+    loadPaste:"Carica", exportCsv:"Esporta CSV",
+    tabTable:"Tabella", tabStats:"Statistiche", tabChart:"Grafici", tabPivot:"Pivot", tabCorr:"Correlazioni",
+    searchPh:"Cerca in tutte le colonne…", clickSort:"clicca un'intestazione per ordinare",
+    chartType:"Tipo di grafico", tBar:"Barre", tLine:"Linea", tScatter:"Dispersione", tHist:"Istogramma", tPie:"Torta",
+    axisX:"Asse X / Categoria", axisY:"Asse Y / Valore", agg:"Aggregazione",
+    aSum:"Somma", aMean:"Media", aCount:"Conteggio", colorBy:"Colore per", bins:"Intervalli",
+    pvRows:"Righe (raggruppa)", pvCols:"Colonne (opzionale)", pvVal:"Valore",
+    corrNote:"Matrice di correlazione di Pearson tra le colonne numeriche.",
+    corrMethod:"Metodo", mPearson:"Pearson", mSpearman:"Spearman", resetView:"Reimposta vista",
+    footRight:"Creato per giornalisti, ricercatori e insegnanti. I tuoi dati restano con te.",
+    none:"(nessuna)", count:"conteggio", total:"Totale generale",
+    rows:n=>n+" righe", cols:n=>n+" colonne", shown:(a,b)=>a+" di "+b+" mostrate",
+    statN:"n (valori)", statMiss:"mancanti", statUniq:"uniche", statMean:"media", statMedian:"mediana",
+    statStd:"dev. std", statMin:"min", statMax:"max", statSum:"somma", statQ1:"Q1", statQ3:"Q3",
+    statRange:"intervallo", statCV:"coef. variazione", statSkew:"asimmetria", piBand:"Intervallo di previsione", autoBins:"auto",
+    statTop:"valori frequenti", needNum:"Seleziona almeno una colonna numerica.",
+    needTwoNum:"Servono almeno 2 colonne numeriche per la correlazione.",
+    pickFields:"Scegli i campi per generare il grafico.",
+    copied:"Copiato negli appunti", loaded:"Dati caricati", parseErr:"Impossibile interpretare il file.",
+    typeNum:"numerico", typeStr:"testo", typeDate:"data", typeBool:"booleano",
+    dl:"Scaricato", filters:"Filtri", addFilter:"+ Aggiungi", clearAll:"Cancella tutto", filterValPh:"valore…",
+    tBox:"Box plot", tHeat:"Mappa di calore", aMedian:"Mediana", aStd:"Dev. std",
+    topN:"Top-N", horiz:"Orizzontale", valLabels:"Etichette", stacked:"Impilato", trend:"Retta di regressione",
+    activeRows:(a,b)=>a+" di "+b+" (filtrate)", regEq:"equazione", needTwoNumChart:"Mappa/box richiede i campi giusti.",
+    opContains:"contiene", opEq:"=", opNe:"≠", opGt:">", opLt:"<", opGe:"≥", opLe:"≤", opStarts:"inizia con",
+    fitType:"Adattamento", fitNone:"—", fitLin:"Lineare", fitLog:"Logaritmica", fitExp:"Esponenziale", fitPow:"Potenza",
+    overlay:"Sovrapposizioni", showNormal:"Curva normale", showMeanMed:"Media/mediana", movAvg:"Media mobile", maWin:"Finestra",
+    dataTools:"Strumenti dati", dedupe:"Rimuovi duplicati", trimWs:"Pulisci spazi", addCol:"+ Colonna calcolata",
+    colName:"Nome colonna", colFormula:"Formula (usa i nomi delle colonne)", create:"Crea", cancel:"Annulla",
+    badFormula:"Formula non valida o senza risultati numerici.", colAdded:"Colonna aggiunta", removed:n=>n+" righe rimosse",
+    trimmed:"Spazi puliti", exportJson:"Esporta JSON", exportStats:"Esporta statistiche", exportChartData:"Dati grafico CSV",
+    formulaHint:"Operatori: + − × ÷ ( ) e funzioni: sqrt, log, abs, round, min, max, pow.",
+    ciBand:"Intervallo di confidenza", groupByHist:"Raggruppa per",
+    saveSession:"Salva sessione", loadSession:"Carica sessione",
+    sessionSaved:"Sessione salvata", sessionLoaded:"Sessione ripristinata", sessionErr:"Sessione non valida per questi dati",
+    about:"Info", aboutTitle:"Informazioni su DataWeave",
+    authorH:"L'autore", authorBody:"DataWeave è realizzato da Alexandru-Ionuț Chiuță (Alexio), sviluppatore, autore di fantascienza e musicista. Altri strumenti a file singolo, senza server né telemetria su chiuta.github.io.",
+    tradeFreeH:"Trade-free", tradeFreeBody:"Questo strumento è offerto liberamente, nello spirito del movimento trade-free (TROM): niente pubblicità, niente account, niente tracciamento. I tuoi dati non lasciano mai il dispositivo.",
+    supportH:"Sostieni il progetto", supportBody:"Se ti è utile e vuoi sostenere il lavoro, puoi farlo qui:",
+    patreon:"Patreon", bmc:"Buy Me a Coffee", contact:"Contatto", visitSite:"Sito web", closeLbl:"Chiudi",
+    columnsBtn:"Colonne", colMgrTitle:"Riordina e nascondi colonne", confLevel:"Livello di confidenza",
+    fitPoly2:"Polinomiale (grado 2)", fitPoly3:"Polinomiale (grado 3)", dragHint:"trascina le intestazioni per riordinare"
+  },
+  es:{
+    tagline:"visualización de datos · 100% en el navegador · cero telemetría",
+    newData:"Nuevos datos", dropTitle:"Arrastra un archivo aquí",
+    dropSub:"CSV · TSV · JSON — nada sale de tu dispositivo",
+    chooseFile:"Elegir archivo", pasteData:"Pegar datos", orTry:"o prueba un conjunto de demostración",
+    loadPaste:"Cargar", exportCsv:"Exportar CSV",
+    tabTable:"Tabla", tabStats:"Estadísticas", tabChart:"Gráficos", tabPivot:"Pivote", tabCorr:"Correlaciones",
+    searchPh:"Buscar en todas las columnas…", clickSort:"haz clic en un encabezado para ordenar",
+    chartType:"Tipo de gráfico", tBar:"Barras", tLine:"Línea", tScatter:"Dispersión", tHist:"Histograma", tPie:"Circular",
+    axisX:"Eje X / Categoría", axisY:"Eje Y / Valor", agg:"Agregación",
+    aSum:"Suma", aMean:"Media", aCount:"Recuento", colorBy:"Color por", bins:"Intervalos",
+    pvRows:"Filas (agrupar)", pvCols:"Columnas (opcional)", pvVal:"Valor",
+    corrNote:"Matriz de correlación de Pearson entre columnas numéricas.",
+    corrMethod:"Método", mPearson:"Pearson", mSpearman:"Spearman", resetView:"Restablecer vista",
+    footRight:"Creado para periodistas, investigadores y docentes. Tus datos se quedan contigo.",
+    none:"(ninguna)", count:"recuento", total:"Total general",
+    rows:n=>n+" filas", cols:n=>n+" columnas", shown:(a,b)=>a+" de "+b+" mostradas",
+    statN:"n (valores)", statMiss:"faltantes", statUniq:"únicos", statMean:"media", statMedian:"mediana",
+    statStd:"desv. típica", statMin:"mín", statMax:"máx", statSum:"suma", statQ1:"Q1", statQ3:"Q3",
+    statRange:"rango", statCV:"coef. variación", statSkew:"asimetría", piBand:"Intervalo de predicción", autoBins:"auto",
+    statTop:"valores frecuentes", needNum:"Selecciona al menos una columna numérica.",
+    needTwoNum:"Se necesitan al menos 2 columnas numéricas para la correlación.",
+    pickFields:"Elige los campos para generar el gráfico.",
+    copied:"Copiado al portapapeles", loaded:"Datos cargados", parseErr:"No se pudo interpretar el archivo.",
+    typeNum:"numérico", typeStr:"texto", typeDate:"fecha", typeBool:"booleano",
+    dl:"Descargado", filters:"Filtros", addFilter:"+ Añadir", clearAll:"Borrar todo", filterValPh:"valor…",
+    tBox:"Diagrama de caja", tHeat:"Mapa de calor", aMedian:"Mediana", aStd:"Desv. típica",
+    topN:"Top-N", horiz:"Horizontal", valLabels:"Etiquetas", stacked:"Apilado", trend:"Recta de regresión",
+    activeRows:(a,b)=>a+" de "+b+" (filtradas)", regEq:"ecuación", needTwoNumChart:"El mapa/caja requiere los campos correctos.",
+    opContains:"contiene", opEq:"=", opNe:"≠", opGt:">", opLt:"<", opGe:"≥", opLe:"≤", opStarts:"empieza por",
+    fitType:"Ajuste", fitNone:"—", fitLin:"Lineal", fitLog:"Logarítmico", fitExp:"Exponencial", fitPow:"Potencia",
+    overlay:"Superposiciones", showNormal:"Curva normal", showMeanMed:"Media/mediana", movAvg:"Media móvil", maWin:"Ventana",
+    dataTools:"Herramientas de datos", dedupe:"Eliminar duplicados", trimWs:"Limpiar espacios", addCol:"+ Columna calculada",
+    colName:"Nombre de columna", colFormula:"Fórmula (usa los nombres de columnas)", create:"Crear", cancel:"Cancelar",
+    badFormula:"Fórmula no válida o sin resultados numéricos.", colAdded:"Columna añadida", removed:n=>n+" filas eliminadas",
+    trimmed:"Espacios limpiados", exportJson:"Exportar JSON", exportStats:"Exportar estadísticas", exportChartData:"Datos del gráfico CSV",
+    formulaHint:"Operadores: + − × ÷ ( ) y funciones: sqrt, log, abs, round, min, max, pow.",
+    ciBand:"Intervalo de confianza", groupByHist:"Agrupar por",
+    saveSession:"Guardar sesión", loadSession:"Cargar sesión",
+    sessionSaved:"Sesión guardada", sessionLoaded:"Sesión restaurada", sessionErr:"Sesión no válida para estos datos",
+    about:"Acerca de", aboutTitle:"Acerca de DataWeave",
+    authorH:"El autor", authorBody:"DataWeave está hecho por Alexandru-Ionuț Chiuță (Alexio), desarrollador, autor de ciencia ficción y músico. Más herramientas de archivo único, sin servidor ni telemetría en chiuta.github.io.",
+    tradeFreeH:"Trade-free", tradeFreeBody:"Esta herramienta se ofrece libremente, en el espíritu del movimiento trade-free (TROM): sin anuncios, sin cuentas, sin rastreo. Tus datos nunca salen de tu dispositivo.",
+    supportH:"Apoya el proyecto", supportBody:"Si te resulta útil y quieres apoyar el trabajo, puedes hacerlo aquí:",
+    patreon:"Patreon", bmc:"Buy Me a Coffee", contact:"Contacto", visitSite:"Sitio web", closeLbl:"Cerrar",
+    columnsBtn:"Columnas", colMgrTitle:"Reordenar y ocultar columnas", confLevel:"Nivel de confianza",
+    fitPoly2:"Polinómica (grado 2)", fitPoly3:"Polinómica (grado 3)", dragHint:"arrastra los encabezados para reordenar"
+  },
+  pt:{
+    tagline:"visualização de dados · 100% no navegador · zero telemetria",
+    newData:"Novos dados", dropTitle:"Arraste um ficheiro aqui",
+    dropSub:"CSV · TSV · JSON — nada sai do seu dispositivo",
+    chooseFile:"Escolher ficheiro", pasteData:"Colar dados", orTry:"ou experimente um conjunto de demonstração",
+    loadPaste:"Carregar", exportCsv:"Exportar CSV",
+    tabTable:"Tabela", tabStats:"Estatísticas", tabChart:"Gráficos", tabPivot:"Pivô", tabCorr:"Correlações",
+    searchPh:"Pesquisar em todas as colunas…", clickSort:"clique num cabeçalho para ordenar",
+    chartType:"Tipo de gráfico", tBar:"Barras", tLine:"Linha", tScatter:"Dispersão", tHist:"Histograma", tPie:"Circular",
+    axisX:"Eixo X / Categoria", axisY:"Eixo Y / Valor", agg:"Agregação",
+    aSum:"Soma", aMean:"Média", aCount:"Contagem", colorBy:"Cor por", bins:"Intervalos",
+    pvRows:"Linhas (agrupar)", pvCols:"Colunas (opcional)", pvVal:"Valor",
+    corrNote:"Matriz de correlação de Pearson entre colunas numéricas.",
+    footRight:"Feito para jornalistas, investigadores e professores. Os seus dados ficam consigo.",
+    none:"(nenhuma)", count:"contagem", total:"Total geral",
+    rows:n=>n+" linhas", cols:n=>n+" colunas", shown:(a,b)=>a+" de "+b+" mostradas",
+    statN:"n (valores)", statMiss:"em falta", statUniq:"únicos", statMean:"média", statMedian:"mediana",
+    statStd:"desvio padrão", statMin:"mín", statMax:"máx", statSum:"soma", statQ1:"Q1", statQ3:"Q3",
+    statRange:"amplitude", statCV:"coef. variação", statSkew:"assimetria", piBand:"Intervalo de previsão", autoBins:"auto",
+    statTop:"valores frequentes", needNum:"Selecione pelo menos uma coluna numérica.",
+    needTwoNum:"São necessárias pelo menos 2 colunas numéricas para a correlação.",
+    pickFields:"Escolha os campos para gerar o gráfico.",
+    copied:"Copiado para a área de transferência", loaded:"Dados carregados", parseErr:"Não foi possível interpretar o ficheiro.",
+    typeNum:"numérico", typeStr:"texto", typeDate:"data", typeBool:"booleano",
+    dl:"Transferido", filters:"Filtros", addFilter:"+ Adicionar", clearAll:"Limpar tudo", filterValPh:"valor…",
+    tBox:"Diagrama de caixa", tHeat:"Mapa de calor", aMedian:"Mediana", aStd:"Desvio padrão",
+    topN:"Top-N", horiz:"Horizontal", valLabels:"Rótulos", stacked:"Empilhado", trend:"Reta de regressão",
+    activeRows:(a,b)=>a+" de "+b+" (filtradas)", regEq:"equação", needTwoNumChart:"Mapa/caixa requer os campos certos.",
+    opContains:"contém", opEq:"=", opNe:"≠", opGt:">", opLt:"<", opGe:"≥", opLe:"≤", opStarts:"começa por",
+    fitType:"Ajuste", fitNone:"—", fitLin:"Linear", fitLog:"Logarítmico", fitExp:"Exponencial", fitPow:"Potência",
+    overlay:"Sobreposições", showNormal:"Curva normal", showMeanMed:"Média/mediana", movAvg:"Média móvel", maWin:"Janela",
+    dataTools:"Ferramentas de dados", dedupe:"Remover duplicados", trimWs:"Limpar espaços", addCol:"+ Coluna calculada",
+    colName:"Nome da coluna", colFormula:"Fórmula (use os nomes das colunas)", create:"Criar", cancel:"Cancelar",
+    badFormula:"Fórmula inválida ou sem resultados numéricos.", colAdded:"Coluna adicionada", removed:n=>n+" linhas removidas",
+    trimmed:"Espaços limpos", exportJson:"Exportar JSON", exportStats:"Exportar estatísticas", exportChartData:"Dados do gráfico CSV",
+    formulaHint:"Operadores: + − × ÷ ( ) e funções: sqrt, log, abs, round, min, max, pow.",
+    ciBand:"Intervalo de confiança", groupByHist:"Agrupar por",
+    saveSession:"Guardar sessão", loadSession:"Carregar sessão",
+    sessionSaved:"Sessão guardada", sessionLoaded:"Sessão restaurada", sessionErr:"Sessão inválida para estes dados",
+    about:"Sobre", aboutTitle:"Sobre o DataWeave",
+    authorH:"O autor", authorBody:"O DataWeave é feito por Alexandru-Ionuț Chiuță (Alexio), programador, autor de FC e músico. Mais ferramentas de ficheiro único, sem servidor nem telemetria em chiuta.github.io.",
+    tradeFreeH:"Trade-free", tradeFreeBody:"Esta ferramenta é oferecida livremente, no espírito do movimento trade-free (TROM): sem anúncios, sem contas, sem rastreio. Os seus dados nunca saem do dispositivo.",
+    supportH:"Apoiar o projeto", supportBody:"Se lhe for útil e quiser apoiar o trabalho, pode fazê-lo aqui:",
+    patreon:"Patreon", bmc:"Buy Me a Coffee", contact:"Contacto", visitSite:"Site", closeLbl:"Fechar",
+    columnsBtn:"Colunas", colMgrTitle:"Reordenar e ocultar colunas", confLevel:"Nível de confiança",
+    fitPoly2:"Polinomial (grau 2)", fitPoly3:"Polinomial (grau 3)", dragHint:"arraste os cabeçalhos para reordenar",
+    corrMethod:"Método", mPearson:"Pearson", mSpearman:"Spearman", resetView:"Repor vista"
+  },
+  de:{
+    tagline:"Datenvisualisierung · 100% im Browser · keine Telemetrie",
+    newData:"Neue Daten", dropTitle:"Datei hier ablegen",
+    dropSub:"CSV · TSV · JSON — nichts verlässt Ihr Gerät",
+    chooseFile:"Datei wählen", pasteData:"Daten einfügen", orTry:"oder probieren Sie einen Demo-Datensatz",
+    loadPaste:"Laden", exportCsv:"CSV exportieren",
+    tabTable:"Tabelle", tabStats:"Statistik", tabChart:"Diagramme", tabPivot:"Pivot", tabCorr:"Korrelationen",
+    searchPh:"In allen Spalten suchen…", clickSort:"Spaltenkopf zum Sortieren anklicken",
+    chartType:"Diagrammtyp", tBar:"Balken", tLine:"Linie", tScatter:"Streudiagramm", tHist:"Histogramm", tPie:"Kreis",
+    axisX:"X-Achse / Kategorie", axisY:"Y-Achse / Wert", agg:"Aggregation",
+    aSum:"Summe", aMean:"Mittelwert", aCount:"Anzahl", colorBy:"Farbe nach", bins:"Klassen",
+    pvRows:"Zeilen (gruppieren)", pvCols:"Spalten (optional)", pvVal:"Wert",
+    corrNote:"Pearson-Korrelationsmatrix zwischen numerischen Spalten.",
+    footRight:"Für Journalisten, Forschende und Lehrkräfte gemacht. Ihre Daten bleiben bei Ihnen.",
+    none:"(keine)", count:"Anzahl", total:"Gesamtsumme",
+    rows:n=>n+" Zeilen", cols:n=>n+" Spalten", shown:(a,b)=>a+" von "+b+" angezeigt",
+    statN:"n (Werte)", statMiss:"fehlend", statUniq:"eindeutig", statMean:"Mittelwert", statMedian:"Median",
+    statStd:"Std.-Abw.", statMin:"Min", statMax:"Max", statSum:"Summe", statQ1:"Q1", statQ3:"Q3",
+    statRange:"Spannweite", statCV:"Variationskoeff.", statSkew:"Schiefe", piBand:"Vorhersageintervall", autoBins:"auto",
+    statTop:"häufige Werte", needNum:"Wählen Sie mindestens eine numerische Spalte.",
+    needTwoNum:"Für die Korrelation sind mindestens 2 numerische Spalten nötig.",
+    pickFields:"Wählen Sie die Felder zum Erzeugen des Diagramms.",
+    copied:"In die Zwischenablage kopiert", loaded:"Daten geladen", parseErr:"Datei konnte nicht interpretiert werden.",
+    typeNum:"numerisch", typeStr:"Text", typeDate:"Datum", typeBool:"boolesch",
+    dl:"Heruntergeladen", filters:"Filter", addFilter:"+ Hinzufügen", clearAll:"Alles löschen", filterValPh:"Wert…",
+    tBox:"Boxplot", tHeat:"Heatmap", aMedian:"Median", aStd:"Std.-Abw.",
+    topN:"Top-N", horiz:"Horizontal", valLabels:"Beschriftungen", stacked:"Gestapelt", trend:"Regressionsgerade",
+    activeRows:(a,b)=>a+" von "+b+" (gefiltert)", regEq:"Gleichung", needTwoNumChart:"Heatmap/Box benötigt die richtigen Felder.",
+    opContains:"enthält", opEq:"=", opNe:"≠", opGt:">", opLt:"<", opGe:"≥", opLe:"≤", opStarts:"beginnt mit",
+    fitType:"Anpassung", fitNone:"—", fitLin:"Linear", fitLog:"Logarithmisch", fitExp:"Exponentiell", fitPow:"Potenz",
+    overlay:"Überlagerungen", showNormal:"Normalkurve", showMeanMed:"Mittelwert/Median", movAvg:"Gleitender Durchschnitt", maWin:"Fenster",
+    dataTools:"Datenwerkzeuge", dedupe:"Duplikate entfernen", trimWs:"Leerzeichen bereinigen", addCol:"+ Berechnete Spalte",
+    colName:"Spaltenname", colFormula:"Formel (Spaltennamen verwenden)", create:"Erstellen", cancel:"Abbrechen",
+    badFormula:"Ungültige Formel oder ohne numerische Ergebnisse.", colAdded:"Spalte hinzugefügt", removed:n=>n+" Zeilen entfernt",
+    trimmed:"Leerzeichen bereinigt", exportJson:"JSON exportieren", exportStats:"Statistik exportieren", exportChartData:"Diagrammdaten CSV",
+    formulaHint:"Operatoren: + − × ÷ ( ) und Funktionen: sqrt, log, abs, round, min, max, pow.",
+    ciBand:"Konfidenzintervall", groupByHist:"Gruppieren nach",
+    saveSession:"Sitzung speichern", loadSession:"Sitzung laden",
+    sessionSaved:"Sitzung gespeichert", sessionLoaded:"Sitzung wiederhergestellt", sessionErr:"Sitzung für diese Daten ungültig",
+    about:"Über", aboutTitle:"Über DataWeave",
+    authorH:"Der Autor", authorBody:"DataWeave wurde von Alexandru-Ionuț Chiuță (Alexio) erstellt — Entwickler, SF-Autor und Musiker. Weitere Einzeldatei-Werkzeuge ohne Server und ohne Telemetrie auf chiuta.github.io.",
+    tradeFreeH:"Trade-free", tradeFreeBody:"Dieses Werkzeug wird frei angeboten, im Geist der Trade-free-Bewegung (TROM): keine Werbung, keine Konten, kein Tracking. Ihre Daten verlassen niemals Ihr Gerät.",
+    supportH:"Das Projekt unterstützen", supportBody:"Wenn es Ihnen nützt und Sie die Arbeit unterstützen möchten, können Sie das hier tun:",
+    patreon:"Patreon", bmc:"Buy Me a Coffee", contact:"Kontakt", visitSite:"Webseite", closeLbl:"Schließen",
+    columnsBtn:"Spalten", colMgrTitle:"Spalten neu ordnen und ausblenden", confLevel:"Konfidenzniveau",
+    fitPoly2:"Polynomial (Grad 2)", fitPoly3:"Polynomial (Grad 3)", dragHint:"Spaltenköpfe zum Umordnen ziehen",
+    corrMethod:"Methode", mPearson:"Pearson", mSpearman:"Spearman", resetView:"Ansicht zurücksetzen"
+  }
+};
+const SUPPORTED_LANGS=['ro','en','fr','it','es','pt','de'];
+let lang=(()=>{
+  const cands=[];
+  if(navigator.languages&&navigator.languages.length)cands.push(...navigator.languages);
+  if(navigator.language)cands.push(navigator.language);
+  for(const c of cands){const code=String(c).slice(0,2).toLowerCase();if(SUPPORTED_LANGS.includes(code))return code;}
+  return 'en';
+})();
+const T = ()=>I18N[lang];
+function applyI18N(){
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k=el.getAttribute('data-i18n'); if(T()[k]!=null && typeof T()[k]==='string') el.textContent=T()[k];
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+    const k=el.getAttribute('data-i18n-ph'); if(T()[k]) el.placeholder=T()[k];
+  });
+  const ls=document.getElementById('langSel'); if(ls)ls.value=lang;
+  if(state.columns.length){ refreshMeta(); rerenderActive(); buildColumnSelectors(); buildFilterOps(); renderFilterChips(); if($('#colMgr')&&$('#colMgr').classList.contains('show'))renderColMgr(); }
+}
+
+/* ========================== STATE ========================== */
+const state = { rows:[], raw:[], columns:[], fileName:'data.csv', delim:',', filters:[],
+  sortCol:null, sortDir:1, search:'', activeTab:'table' };
+const $ = s=>document.querySelector(s);
+const LOCALE={ro:'ro-RO',en:'en-US',fr:'fr-FR',it:'it-IT',es:'es-ES',pt:'pt-PT'};
+const loc=()=>LOCALE[lang]||'en-US';
+const fmtNum = x => {
+  if(x==null||Number.isNaN(x)) return '—';
+  if(Number.isInteger(x)) return x.toLocaleString(loc());
+  const abs=Math.abs(x);
+  let d = abs>=1000?0 : abs>=1?2 : abs>=0.01?4 : 6;
+  return x.toLocaleString(loc(),{maximumFractionDigits:d});
+};
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1800);}
+
+/* ========================== PARSING ========================== */
+function detectDelimiter(text){
+  const sample = text.split(/\r?\n/).slice(0,5).join('\n');
+  const cands = [',',';','\t','|'];
+  let best=',', bestScore=-1;
+  for(const d of cands){
+    const counts = sample.split(/\r?\n/).filter(l=>l.length).map(l=>l.split(d).length);
+    if(!counts.length) continue;
+    const mean = counts.reduce((a,b)=>a+b,0)/counts.length;
+    const variance = counts.reduce((a,b)=>a+(b-mean)**2,0)/counts.length;
+    const score = (mean-1) - variance; // many fields, consistent
+    if(mean>1 && score>bestScore){bestScore=score;best=d;}
+  }
+  return best;
+}
+// RFC-4180-ish parser with quotes, embedded newlines, escaped quotes
+function parseDelimited(text, delim){
+  const rows=[]; let field='', row=[], i=0, inQ=false;
+  text = text.replace(/^\uFEFF/,''); // strip BOM
+  const n=text.length;
+  while(i<n){
+    const c=text[i];
+    if(inQ){
+      if(c==='"'){ if(text[i+1]==='"'){field+='"';i+=2;continue;} inQ=false;i++;continue; }
+      field+=c;i++;continue;
+    }
+    if(c==='"'){inQ=true;i++;continue;}
+    if(c===delim){row.push(field);field='';i++;continue;}
+    if(c==='\n'){row.push(field);rows.push(row);field='';row=[];i++;continue;}
+    if(c==='\r'){ if(text[i+1]==='\n')i++; row.push(field);rows.push(row);field='';row=[];i++;continue;}
+    field+=c;i++;
+  }
+  if(field.length||row.length){row.push(field);rows.push(row);}
+  return rows.filter(r=>!(r.length===1 && r[0].trim()===''));
+}
+const DATE_RE=/^\d{4}-\d{1,2}-\d{1,2}([ T]\d{1,2}:\d{2}(:\d{2})?)?$|^\d{1,2}[\/.]\d{1,2}[\/.]\d{2,4}$/;
+function parseMaybeNumber(s){
+  if(s==null) return null;
+  let t=String(s).trim();
+  if(t==='') return null;
+  // allow thousands sep and comma decimal
+  let v=t.replace(/\s/g,'');
+  if(/^-?\d{1,3}(\.\d{3})+(,\d+)?$/.test(v)) v=v.replace(/\./g,'').replace(',','.');      // 1.234.567,89
+  else if(/^-?\d{1,3}(,\d{3})+(\.\d+)?$/.test(v)) v=v.replace(/,/g,'');                     // 1,234,567.89
+  else if(/^-?\d+,\d+$/.test(v)) v=v.replace(',','.');                                      // 12,5
+  if(/^-?\d*\.?\d+([eE][+-]?\d+)?%?$/.test(v)){
+    const pct=v.endsWith('%'); const num=parseFloat(pct?v.slice(0,-1):v);
+    if(!Number.isNaN(num)) return pct?num/100:num;
+  }
+  return NaN;
+}
+function inferType(values){
+  let num=0, date=0, bool=0, nonEmpty=0;
+  for(const v of values){
+    if(v==null||String(v).trim()==='') continue;
+    nonEmpty++;
+    const s=String(v).trim();
+    if(['true','false','da','nu','yes','no'].includes(s.toLowerCase())) bool++;
+    if(!Number.isNaN(parseMaybeNumber(s))) num++;
+    else if(DATE_RE.test(s) && !Number.isNaN(Date.parse(s))) date++;
+  }
+  if(nonEmpty===0) return 'string';
+  if(num/nonEmpty>=0.85) return 'number';
+  if(date/nonEmpty>=0.85) return 'date';
+  if(bool/nonEmpty>=0.85) return 'boolean';
+  return 'string';
+}
+function coerce(val,type){
+  if(val==null||String(val).trim()==='') return null;
+  const s=String(val).trim();
+  if(type==='number'){const n=parseMaybeNumber(s);return Number.isNaN(n)?null:n;}
+  if(type==='boolean'){const l=s.toLowerCase();if(['true','da','yes'].includes(l))return true;if(['false','nu','no'].includes(l))return false;return null;}
+  if(type==='date'){const d=Date.parse(s);return Number.isNaN(d)?null:s;}
+  return s;
+}
+function ingest(rawText, fileName){
+  let rows, headers;
+  const trimmed=rawText.trim();
+  if(trimmed.startsWith('{')||trimmed.startsWith('[')){
+    let json; try{json=JSON.parse(trimmed);}catch(e){throw new Error('json');}
+    let arr=Array.isArray(json)?json:(Array.isArray(json.data)?json.data:Object.values(json).find(Array.isArray));
+    if(!Array.isArray(arr)) throw new Error('json-shape');
+    const keys=[...new Set(arr.flatMap(o=>o&&typeof o==='object'?Object.keys(o):[]))];
+    headers=keys; rows=arr.map(o=>keys.map(k=>o?(o[k]??''):''));
+    state.delim='json';
+  } else {
+    const d=detectDelimiter(rawText); state.delim=d;
+    const grid=parseDelimited(rawText,d);
+    if(!grid.length) throw new Error('empty');
+    headers=grid[0].map((h,i)=>h.trim()||('col'+(i+1)));
+    rows=grid.slice(1);
+  }
+  // normalize width
+  const width=headers.length;
+  rows=rows.map(r=>{const o=r.slice(0,width);while(o.length<width)o.push('');return o;});
+  // type inference per column
+  const columns=headers.map((name,ci)=>{
+    const colVals=rows.map(r=>r[ci]);
+    return {name, type:inferType(colVals), key:'c'+ci, ord:ci};
+  });
+  // build objects with coercion
+  const objs=rows.map(r=>{const o={};columns.forEach((c,ci)=>{o[c.key]=coerce(r[ci],c.type);});return o;});
+  state.columns=columns; state.rows=objs; state.raw=rows; state.fileName=fileName;
+  state.sortCol=null; state.search=''; state.sortDir=1; state.filters=[];
+}
+
+/* ========================== FILTERS / ROW VIEW ========================== */
+function colByKey(k){return state.columns.find(c=>c.key===k);}
+function visibleColumns(){return state.columns.filter(c=>!c.hidden);}
+function passFilter(row,f){
+  const c=colByKey(f.key); if(!c) return true;
+  const v=row[f.key];
+  if(c.type==='number'){
+    const n=parseMaybeNumber(f.value); if(Number.isNaN(n)) return true;
+    if(typeof v!=='number'||Number.isNaN(v)) return false;
+    switch(f.op){case'eq':return v===n;case'ne':return v!==n;case'gt':return v>n;
+      case'lt':return v<n;case'ge':return v>=n;case'le':return v<=n;default:return true;}
+  }
+  const s=(v==null?'':String(v)).toLowerCase(), q=String(f.value).toLowerCase();
+  switch(f.op){case'contains':return s.includes(q);case'eq':return s===q;case'ne':return s!==q;
+    case'starts':return s.startsWith(q);case'gt':return s>q;case'lt':return s<q;
+    case'ge':return s>=q;case'le':return s<=q;default:return s.includes(q);}
+}
+// rows after global filters (used by ALL analytics; table adds search+sort on top)
+function baseRows(){
+  if(!state.filters.length) return state.rows;
+  return state.rows.filter(r=>state.filters.every(f=>passFilter(r,f)));
+}
+function recoerceColumn(col){
+  if(col.formula){ // computed column: re-coerce its existing values, not raw source
+    state.rows.forEach(o=>{o[col.key]=coerce(o[col.key],col.type);});
+    return;
+  }
+  const ci=parseInt(col.key.slice(1),10);
+  state.rows.forEach((o,ri)=>{o[col.key]=coerce(state.raw[ri]?state.raw[ri][ci]:null,col.type);});
+}
+const OPS_NUM=['eq','ne','gt','lt','ge','le'];
+const OPS_TXT=['contains','eq','ne','starts','gt','lt','ge','le'];
+const OP_LABEL=op=>({contains:'opContains',eq:'opEq',ne:'opNe',gt:'opGt',lt:'opLt',ge:'opGe',le:'opLe',starts:'opStarts'}[op]);
+
+/* shared aggregator: arr of numbers + agg name -> value */
+function aggregate(arr,agg){
+  if(agg==='count') return arr.length;
+  if(!arr.length) return null;
+  if(agg==='sum') return arr.reduce((a,b)=>a+b,0);
+  if(agg==='mean') return arr.reduce((a,b)=>a+b,0)/arr.length;
+  if(agg==='min') return Math.min(...arr);
+  if(agg==='max') return Math.max(...arr);
+  if(agg==='median'){const s=arr.slice().sort((a,b)=>a-b);return quantile(s,.5);}
+  if(agg==='std'){const m=arr.reduce((a,b)=>a+b,0)/arr.length;
+    return Math.sqrt(arr.reduce((a,b)=>a+(b-m)**2,0)/(arr.length>1?arr.length-1:1));}
+  return null;
+}
+
+/* ========================== STATS ========================== */
+function numericValues(key){return baseRows().map(r=>r[key]).filter(v=>typeof v==='number'&&!Number.isNaN(v));}
+function quantile(sorted,q){
+  if(!sorted.length) return null;
+  const pos=(sorted.length-1)*q, base=Math.floor(pos), rest=pos-base;
+  return sorted[base+1]!==undefined ? sorted[base]+rest*(sorted[base+1]-sorted[base]) : sorted[base];
+}
+function describeNumeric(key){
+  const v=numericValues(key).slice().sort((a,b)=>a-b);
+  const n=v.length;
+  if(!n) return null;
+  const sum=v.reduce((a,b)=>a+b,0), mean=sum/n;
+  const variance=v.reduce((a,b)=>a+(b-mean)**2,0)/(n>1?n-1:1);
+  const std=Math.sqrt(variance);
+  let skew=null;
+  if(n>2 && std>0){const m3=v.reduce((a,b)=>a+(b-mean)**3,0)/n;skew=(m3/Math.pow(std,3))*(n*n)/((n-1)*(n-2))/n*n; // adjusted-ish
+    const g1=v.reduce((a,b)=>a+((b-mean)/std)**3,0)/n; skew=Math.sqrt(n*(n-1))/(n-2)*g1;}
+  const cv=(mean!==0)?std/Math.abs(mean):null;
+  return {n, missing:baseRows().length-n, mean, median:quantile(v,.5), std,
+    min:v[0], max:v[n-1], sum, q1:quantile(v,.25), q3:quantile(v,.75), skew, cv, range:v[n-1]-v[0], sorted:v};
+}
+function describeCategorical(key){
+  const counts=new Map(); let missing=0; const rows=baseRows();
+  for(const r of rows){const x=r[key];if(x==null||x===''){missing++;continue;}const s=String(x);counts.set(s,(counts.get(s)||0)+1);}
+  const top=[...counts.entries()].sort((a,b)=>b[1]-a[1]).slice(0,6);
+  return {n:rows.length-missing, missing, unique:counts.size, top};
+}
+
+/* ========================== TABLE ========================== */
+function visibleRows(){
+  let rows=baseRows().map((r,i)=>({r,i}));
+  if(state.search){
+    const q=state.search.toLowerCase();
+    rows=rows.filter(({r})=>state.columns.some(c=>String(r[c.key]??'').toLowerCase().includes(q)));
+  }
+  if(state.sortCol==='__row__'){
+    rows.sort((A,B)=>(A.i-B.i)*state.sortDir);
+  } else if(state.sortCol){
+    const c=state.columns.find(x=>x.key===state.sortCol);
+    if(c) rows.sort((A,B)=>{
+      let a=A.r[c.key],b=B.r[c.key];
+      if(a==null&&b==null)return 0; if(a==null)return 1; if(b==null)return -1;
+      if(c.type==='number'){return (a-b)*state.sortDir;}
+      return String(a).localeCompare(String(b),lang,{numeric:true})*state.sortDir;
+    });
+  }
+  return rows;
+}
+function renderTable(){
+  const rows=visibleRows();
+  const limit=2000; const show=rows.slice(0,limit);
+  const rowArrow=state.sortCol==='__row__'?(state.sortDir>0?' ▲':' ▼'):'';
+  let h='<thead><tr><th class="rownum" id="rowSortTh" title="#"><span class="hsort">#'+rowArrow+'</span></th>';
+  const cols=visibleColumns();
+  for(const c of cols){
+    const arrow=state.sortCol===c.key?(state.sortDir>0?' ▲':' ▼'):'';
+    const tym={number:T().typeNum,string:T().typeStr,date:T().typeDate,boolean:T().typeBool};
+    const opts=['number','string','date','boolean'].map(t=>`<option value="${t}"${c.type===t?' selected':''}>${tym[t]}</option>`).join('');
+    h+=`<th data-key="${c.key}" draggable="true" title="${esc(T().dragHint)}"><span class="hsort">${esc(c.name)}${arrow}</span><select class="ty-sel" data-tykey="${c.key}">${opts}</select></th>`;
+  }
+  h+='</tr></thead><tbody>';
+  for(const {r,i} of show){
+    h+=`<tr><td class="rownum">${i+1}</td>`;
+    for(const c of cols){
+      const v=r[c.key];
+      if(v==null||v==='') h+='<td class="miss">—</td>';
+      else if(c.type==='number') h+=`<td class="num">${fmtNum(v)}</td>`;
+      else h+=`<td>${esc(v)}</td>`;
+    }
+    h+='</tr>';
+  }
+  h+='</tbody>';
+  $('#dataTable').innerHTML=h;
+  $('#tblShown').textContent=T().shown(Math.min(rows.length,limit),state.rows.length);
+  $('#dataTable').querySelectorAll('th[data-key] .hsort').forEach(sp=>{
+    sp.style.cursor='pointer';
+    sp.onclick=()=>{const k=sp.parentElement.dataset.key;if(state.sortCol===k)state.sortDir*=-1;else{state.sortCol=k;state.sortDir=1;}renderTable();};
+  });
+  const rowTh=$('#rowSortTh');
+  if(rowTh){const sp=rowTh.querySelector('.hsort');sp.style.cursor='pointer';
+    sp.onclick=()=>{if(state.sortCol==='__row__')state.sortDir*=-1;else{state.sortCol='__row__';state.sortDir=1;}renderTable();};}
+  $('#dataTable').querySelectorAll('.ty-sel').forEach(sel=>{
+    sel.onclick=e=>e.stopPropagation();
+    sel.onchange=e=>{
+      const col=colByKey(sel.dataset.tykey); if(!col)return;
+      col.type=sel.value; recoerceColumn(col);
+      state.filters=state.filters.filter(f=>f.key!==col.key);
+      buildColumnSelectors(); buildFilterControls(); renderFilterChips(); renderTable();
+    };
+  });
+  // drag-and-drop column reordering (desktop)
+  let dragKey=null;
+  $('#dataTable').querySelectorAll('th[data-key]').forEach(th=>{
+    th.addEventListener('dragstart',e=>{dragKey=th.dataset.key;th.classList.add('dragging');e.dataTransfer.effectAllowed='move';});
+    th.addEventListener('dragend',()=>{dragKey=null;th.classList.remove('dragging');$('#dataTable').querySelectorAll('th').forEach(t=>t.classList.remove('dragover'));});
+    th.addEventListener('dragover',e=>{e.preventDefault();if(dragKey&&dragKey!==th.dataset.key)th.classList.add('dragover');});
+    th.addEventListener('dragleave',()=>th.classList.remove('dragover'));
+    th.addEventListener('drop',e=>{e.preventDefault();th.classList.remove('dragover');if(dragKey&&dragKey!==th.dataset.key)moveColumnBefore(dragKey,th.dataset.key);});
+  });
+}
+function moveColumnBefore(srcKey,targetKey){
+  const cols=state.columns;
+  const si=cols.findIndex(c=>c.key===srcKey), ti=cols.findIndex(c=>c.key===targetKey);
+  if(si<0||ti<0||si===ti)return;
+  const [m]=cols.splice(si,1);
+  const newTi=cols.findIndex(c=>c.key===targetKey);
+  cols.splice(newTi+(si<ti?1:0),0,m);
+  renderTable(); buildColumnSelectors(); if($('#colMgr').classList.contains('show'))renderColMgr();
+}
+function moveColumn(key,dir){
+  const cols=state.columns, i=cols.findIndex(c=>c.key===key), j=i+dir;
+  if(i<0||j<0||j>=cols.length)return;
+  [cols[i],cols[j]]=[cols[j],cols[i]];
+  renderColMgr(); renderTable(); buildColumnSelectors();
+}
+function renderColMgr(){
+  const list=$('#cmList'); if(!list)return;
+  list.innerHTML=state.columns.map((c,i)=>{
+    const tym={number:T().typeNum,string:T().typeStr,date:T().typeDate,boolean:T().typeBool};
+    return `<div class="cm-row${c.hidden?' hiddencol':''}">
+      <input type="checkbox" data-cmkey="${c.key}" ${c.hidden?'':'checked'}>
+      <span class="cm-name">${esc(c.name)}</span>
+      <span class="cm-ty">${tym[c.type]}</span>
+      <span class="cm-mv" data-mv="up" data-cmkey="${c.key}" ${i===0?'style="opacity:.3;pointer-events:none"':''}>↑</span>
+      <span class="cm-mv" data-mv="down" data-cmkey="${c.key}" ${i===state.columns.length-1?'style="opacity:.3;pointer-events:none"':''}>↓</span>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{const col=colByKey(cb.dataset.cmkey);if(col){col.hidden=!cb.checked;renderColMgr();renderTable();buildColumnSelectors();buildFilterOps();}});
+  list.querySelectorAll('.cm-mv').forEach(b=>b.onclick=()=>moveColumn(b.dataset.cmkey,b.dataset.mv==='up'?-1:1));
+}
+
+/* ========================== STATS RENDER ========================== */
+function sparkline(sorted,w=240,hgt=42){
+  if(sorted.length<2) return '';
+  const bins=Math.min(28,Math.max(6,Math.round(Math.sqrt(sorted.length))));
+  const min=sorted[0],max=sorted[sorted.length-1],span=(max-min)||1;
+  const hist=new Array(bins).fill(0);
+  for(const v of sorted){let b=Math.floor((v-min)/span*bins);if(b>=bins)b=bins-1;hist[b]++;}
+  const hm=Math.max(...hist)||1; const bw=w/bins;
+  let bars='';
+  hist.forEach((c,i)=>{const bh=c/hm*(hgt-4);bars+=`<rect x="${(i*bw+1).toFixed(1)}" y="${(hgt-bh).toFixed(1)}" width="${(bw-2).toFixed(1)}" height="${bh.toFixed(1)}" fill="var(--accent)" opacity="0.8" rx="1"/>`;});
+  return `<svg class="spark" viewBox="0 0 ${w} ${hgt}" preserveAspectRatio="none">${bars}</svg>`;
+}
+function renderStats(){
+  let h='';
+  for(const c of visibleColumns()){
+    if(c.type==='number'){
+      const s=describeNumeric(c.key); if(!s)continue;
+      h+=`<div class="stat-card"><h3>${esc(c.name)}<span class="ty2">${T().typeNum}</span></h3>
+      <div class="stat-rows">
+        <span class="k">${T().statN}</span><span class="v">${s.n}</span>
+        <span class="k">${T().statMiss}</span><span class="v">${s.missing}</span>
+        <span class="k">${T().statMean}</span><span class="v">${fmtNum(s.mean)}</span>
+        <span class="k">${T().statMedian}</span><span class="v">${fmtNum(s.median)}</span>
+        <span class="k">${T().statStd}</span><span class="v">${fmtNum(s.std)}</span>
+        <span class="k">${T().statMin}</span><span class="v">${fmtNum(s.min)}</span>
+        <span class="k">${T().statQ1}</span><span class="v">${fmtNum(s.q1)}</span>
+        <span class="k">${T().statQ3}</span><span class="v">${fmtNum(s.q3)}</span>
+        <span class="k">${T().statMax}</span><span class="v">${fmtNum(s.max)}</span>
+        <span class="k">${T().statRange}</span><span class="v">${fmtNum(s.range)}</span>
+        <span class="k">${T().statSum}</span><span class="v">${fmtNum(s.sum)}</span>
+        <span class="k">${T().statCV}</span><span class="v">${s.cv==null?'—':(s.cv*100).toFixed(1)+'%'}</span>
+        <span class="k">${T().statSkew}</span><span class="v">${s.skew==null?'—':s.skew.toFixed(3)}</span>
+      </div>${sparkline(s.sorted)}</div>`;
+    } else {
+      const s=describeCategorical(c.key);
+      const maxc=s.top.length?s.top[0][1]:1;
+      let bars='';
+      for(const [val,ct] of s.top){
+        bars+=`<div class="bar"><span class="lbl" title="${esc(val)}">${esc(val)}</span>
+        <div class="track"><div class="fill" style="width:${(ct/maxc*100).toFixed(1)}%"></div></div>
+        <span class="ct">${ct}</span></div>`;
+      }
+      h+=`<div class="stat-card cat"><h3>${esc(c.name)}<span class="ty2">${ {string:T().typeStr,date:T().typeDate,boolean:T().typeBool}[c.type] }</span></h3>
+      <div class="stat-rows">
+        <span class="k">${T().statN}</span><span class="v">${s.n}</span>
+        <span class="k">${T().statMiss}</span><span class="v">${s.missing}</span>
+        <span class="k">${T().statUniq}</span><span class="v">${s.unique}</span>
+      </div>
+      <div class="topvals"><div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin:8px 0 4px">${T().statTop}</div>${bars}</div></div>`;
+    }
+  }
+  $('#statGrid').innerHTML=h;
+}
+
+/* ========================== CHARTS (pure SVG) ========================== */
+const PALETTE=['var(--c1)','var(--c2)','var(--c3)','var(--c4)','var(--c5)','var(--c6)','var(--c7)','var(--c8)'];
+function svgWrap(inner,w,h){return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg" font-family="${getComputedStyle(document.body).getPropertyValue('--mono')}">${inner}</svg>`;}
+function axisStyle(){return {axis:getCol('--line-strong'),text:getCol('--ink-soft'),grid:getCol('--line')};}
+function getCol(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+function niceTicks(min,max,count){
+  const span=(max-min)||1, step0=span/count, mag=Math.pow(10,Math.floor(Math.log10(step0)));
+  const norm=step0/mag; let step;
+  step=(norm<1.5?1:norm<3?2:norm<7?5:10)*mag;
+  const start=Math.ceil(min/step)*step, ticks=[];
+  for(let v=start;v<=max+step*1e-9;v+=step)ticks.push(+v.toFixed(10));
+  return ticks;
+}
+function groupAgg(catKey,valKey,agg,catType){
+  const m=new Map();
+  for(const r of baseRows()){
+    const k=r[catKey]; if(k==null||k==='')continue;
+    const ks=String(k); if(!m.has(ks))m.set(ks,[]);
+    const v=r[valKey]; if(typeof v==='number'&&!Number.isNaN(v))m.get(ks).push(v);
+    else if(agg==='count')m.get(ks).push(1);
+  }
+  const out=[];
+  for(const [k,arr] of m){
+    let val=aggregate(arr,agg); if(val==null)val=0;
+    out.push([k,val]);
+  }
+  if(catType==='number') out.sort((a,b)=>parseFloat(a[0])-parseFloat(b[0]));
+  else if(catType==='date') out.sort((a,b)=>Date.parse(a[0])-Date.parse(b[0]));
+  else out.sort((a,b)=>b[1]-a[1]);
+  return out;
+}
+function crossTab(xKey,colorKey,valKey,agg){
+  // returns {cats:[xcat], series:[colorcat], get(x,s)->val, totals:Map}
+  const m=new Map(), seriesSet=new Set(), totals=new Map();
+  for(const r of baseRows()){
+    const xc=r[xKey]; if(xc==null||xc==='')continue;
+    const sc=r[colorKey]; const ss=(sc==null||sc==='')?'—':String(sc);
+    const xs=String(xc); seriesSet.add(ss);
+    const key=xs+'\u0001'+ss; if(!m.has(key))m.set(key,[]);
+    const v=r[valKey]; if(typeof v==='number'&&!Number.isNaN(v))m.get(key).push(v); else if(agg==='count')m.get(key).push(1);
+  }
+  const cats=[...new Set([...m.keys()].map(k=>k.split('\u0001')[0]))];
+  const series=[...seriesSet];
+  const get=(x,s)=>{const a=m.get(x+'\u0001'+s);return a?aggregate(a,agg):null;};
+  for(const x of cats){let t=0;for(const s of series){const v=get(x,s);if(v!=null)t+=v;}totals.set(x,t);}
+  cats.sort((a,b)=>(totals.get(b)||0)-(totals.get(a)||0));
+  return {cats,series,get,totals};
+}
+function chartBar(){
+  const x=$('#chX').value,y=$('#chY').value,agg=$('#chAgg').value;
+  const color=$('#chColor').value, horiz=$('#chHoriz').checked, labels=$('#chLabels').checked, stack=$('#chStack').checked;
+  const cx=colByKey(x); if(!cx)return note();
+  const topN=Math.max(1,Math.min(100,+$('#chTopN').value||20));
+  const st=axisStyle();
+  const grouped = color && color!==x;
+
+  if(grouped){
+    const ct=crossTab(x,color,y,agg);
+    let cats=ct.cats.slice(0,topN), series=ct.series.slice(0,8);
+    if(!cats.length)return note();
+    // value extents
+    let lo=0,hi=0;
+    for(const c of cats){ if(stack){let pos=0,neg=0;series.forEach(s=>{const v=ct.get(c,s)||0;if(v>=0)pos+=v;else neg+=v;});hi=Math.max(hi,pos);lo=Math.min(lo,neg);}
+      else series.forEach(s=>{const v=ct.get(c,s);if(v!=null){hi=Math.max(hi,v);lo=Math.min(lo,v);}}); }
+    return barCanvas(cats,series,ct,{lo,hi,horiz,labels,stack,st,grouped:true});
+  }
+  let data=groupAgg(x,y,agg,cx.type).slice(0,topN);
+  if(!data.length)return note();
+  const lo=Math.min(0,...data.map(d=>d[1])),hi=Math.max(0,...data.map(d=>d[1]));
+  return barCanvas(data.map(d=>d[0]),null,{get:(c)=>data.find(d=>d[0]===c)[1]},{lo,hi,horiz,labels,stack:false,st,grouped:false});
+}
+function barCanvas(cats,series,ct,o){
+  const {lo,hi,horiz,labels,stack,st}=o;
+  const n=cats.length;
+  const ticks=niceTicks(lo,hi,6),tmax=Math.max(hi,...ticks),tmin=Math.min(lo,...ticks);
+  let inner='',leg='';
+  const legW=o.grouped?150:0;
+  if(horiz){
+    const rowH=Math.max(20,Math.min(46,520/n)), H=Math.max(220,n*rowH+70), W=900, pad={l:160,r:24+legW,t:20,b:46};
+    const sc=v=>pad.l+(W-pad.l-pad.r)*((v-tmin)/((tmax-tmin)||1));
+    let g='';
+    for(const t of ticks){const xx=sc(t);g+=`<line x1="${xx}" y1="${pad.t}" x2="${xx}" y2="${H-pad.b}" stroke="${st.grid}"/><text x="${xx}" y="${H-pad.b+16}" text-anchor="middle" font-size="11" fill="${st.text}">${fmtNum(t)}</text>`;}
+    const zero=sc(0);
+    cats.forEach((c,i)=>{
+      const cy=pad.t+i*rowH+rowH*0.15, bh=rowH*0.7;
+      if(o.grouped){
+        if(stack){let accP=0,accN=0;series.forEach((s,si)=>{const v=ct.get(c,s)||0;if(v===0)return;const x1=v>=0?sc(accP):sc(accN+v),x2=v>=0?sc(accP+v):sc(accN);inner+=`<rect x="${Math.min(x1,x2).toFixed(1)}" y="${cy.toFixed(1)}" width="${Math.abs(x2-x1).toFixed(1)}" height="${bh.toFixed(1)}" fill="${PALETTE[si%8]}"><title>${esc(c)} · ${esc(s)}: ${fmtNum(v)}</title></rect>`;if(v>=0)accP+=v;else accN+=v;});}
+        else{const sh=bh/series.length;series.forEach((s,si)=>{const v=ct.get(c,s);if(v==null)return;const x1=sc(0),x2=sc(v);inner+=`<rect x="${Math.min(x1,x2).toFixed(1)}" y="${(cy+si*sh).toFixed(1)}" width="${Math.abs(x2-x1).toFixed(1)}" height="${(sh-1).toFixed(1)}" fill="${PALETTE[si%8]}"><title>${esc(c)} · ${esc(s)}: ${fmtNum(v)}</title></rect>`;});}
+      } else {
+        const v=ct.get(c);const x1=sc(0),x2=sc(v);
+        inner+=`<rect x="${Math.min(x1,x2).toFixed(1)}" y="${cy.toFixed(1)}" width="${Math.abs(x2-x1).toFixed(1)}" height="${bh.toFixed(1)}" fill="${PALETTE[i%8]}" rx="2"><title>${esc(c)}: ${fmtNum(v)}</title></rect>`;
+        if(labels)inner+=`<text x="${(Math.max(x1,x2)+5).toFixed(1)}" y="${(cy+bh/2+4).toFixed(1)}" font-size="11" fill="${st.text}">${fmtNum(v)}</text>`;
+      }
+      const lab=c.length>22?c.slice(0,21)+'…':c;
+      inner+=`<text x="${pad.l-8}" y="${(cy+bh/2+4).toFixed(1)}" text-anchor="end" font-size="11" fill="${st.text}">${esc(lab)}</text>`;
+    });
+    if(o.grouped)series.forEach((s,si)=>{leg+=`<rect x="${W-legW-10}" y="${pad.t+si*18}" width="12" height="12" rx="2" fill="${PALETTE[si%8]}"/><text x="${W-legW+6}" y="${pad.t+si*18+10}" font-size="11" fill="${st.text}">${esc(String(s).length>16?s.slice(0,15)+'…':s)}</text>`;});
+    return svgWrap(`${g}<line x1="${zero}" y1="${pad.t}" x2="${zero}" y2="${H-pad.b}" stroke="${st.axis}" stroke-width="1.5"/>${inner}${leg}`,W,H);
+  }
+  // vertical
+  const W=Math.max(640,Math.min(1180,n*(o.grouped&&!stack?Math.max(48,series.length*14):52)+170+legW)),H=460,pad={l:72,r:24+legW,t:24,b:124};
+  const sc=v=>pad.t+(H-pad.t-pad.b)*(1-(v-tmin)/((tmax-tmin)||1));
+  const bw=(W-pad.l-pad.r)/n, zero=sc(0);
+  let g='';
+  for(const t of ticks){const yy=sc(t);g+=`<line x1="${pad.l}" y1="${yy}" x2="${W-pad.r}" y2="${yy}" stroke="${st.grid}"/><text x="${pad.l-8}" y="${yy+4}" text-anchor="end" font-size="11" fill="${st.text}">${fmtNum(t)}</text>`;}
+  cats.forEach((c,i)=>{
+    const x0=pad.l+i*bw;
+    if(o.grouped){
+      if(stack){let accP=0,accN=0;series.forEach((s,si)=>{const v=ct.get(c,s)||0;if(v===0)return;const y1=v>=0?sc(accP+v):sc(accN),y2=v>=0?sc(accP):sc(accN+v);inner+=`<rect x="${(x0+bw*0.12).toFixed(1)}" y="${Math.min(y1,y2).toFixed(1)}" width="${(bw*0.76).toFixed(1)}" height="${Math.abs(y2-y1).toFixed(1)}" fill="${PALETTE[si%8]}"><title>${esc(c)} · ${esc(s)}: ${fmtNum(v)}</title></rect>`;if(v>=0)accP+=v;else accN+=v;});}
+      else{const sw=bw*0.76/series.length;series.forEach((s,si)=>{const v=ct.get(c,s);if(v==null)return;const bx=x0+bw*0.12+si*sw,vy=sc(v),top=Math.min(vy,zero),hh=Math.abs(vy-zero);inner+=`<rect x="${bx.toFixed(1)}" y="${top.toFixed(1)}" width="${(sw-1).toFixed(1)}" height="${Math.max(0.5,hh).toFixed(1)}" fill="${PALETTE[si%8]}"><title>${esc(c)} · ${esc(s)}: ${fmtNum(v)}</title></rect>`;});}
+    } else {
+      const v=ct.get(c),vy=sc(v),top=Math.min(vy,zero),hh=Math.abs(vy-zero);
+      inner+=`<rect x="${(x0+bw*0.12).toFixed(1)}" y="${top.toFixed(1)}" width="${(bw*0.76).toFixed(1)}" height="${Math.max(0.5,hh).toFixed(1)}" fill="${PALETTE[i%8]}" rx="2"><title>${esc(c)}: ${fmtNum(v)}</title></rect>`;
+      if(labels)inner+=`<text x="${(x0+bw/2).toFixed(1)}" y="${(top-5).toFixed(1)}" text-anchor="middle" font-size="11" fill="${st.text}">${fmtNum(v)}</text>`;
+    }
+    const lx=x0+bw/2, ly=H-pad.b+14, lab=c.length>14?c.slice(0,13)+'…':c;
+    inner+=`<text x="${lx.toFixed(1)}" y="${ly}" transform="rotate(45 ${lx.toFixed(1)} ${ly})" font-size="11" fill="${st.text}">${esc(lab)}</text>`;
+  });
+  if(o.grouped)series.forEach((s,si)=>{leg+=`<rect x="${W-legW-6}" y="${pad.t+si*18}" width="12" height="12" rx="2" fill="${PALETTE[si%8]}"/><text x="${W-legW+10}" y="${pad.t+si*18+10}" font-size="11" fill="${st.text}">${esc(String(s).length>16?s.slice(0,15)+'…':s)}</text>`;});
+  return svgWrap(`${g}<line x1="${pad.l}" y1="${zero}" x2="${W-pad.r}" y2="${zero}" stroke="${st.axis}" stroke-width="1.5"/>${inner}${leg}`,W,H);
+}
+function chartPie(){
+  const x=$('#chX').value,y=$('#chY').value,agg=$('#chAgg').value;
+  const cx=state.columns.find(c=>c.key===x); if(!cx)return note();
+  let data=groupAgg(x,y,agg,'string').filter(d=>d[1]>0).slice(0,10);
+  if(!data.length)return note();
+  const W=620,H=420,cxp=200,cyp=210,R=160;
+  const tot=data.reduce((a,b)=>a+b[1],0); let ang=-Math.PI/2,paths='',leg='';
+  const st=axisStyle();
+  data.forEach((d,i)=>{
+    const frac=d[1]/tot,a2=ang+frac*2*Math.PI;
+    const x1=cxp+R*Math.cos(ang),y1=cyp+R*Math.sin(ang),x2=cxp+R*Math.cos(a2),y2=cyp+R*Math.sin(a2);
+    const large=frac>0.5?1:0;
+    paths+=`<path d="M${cxp} ${cyp} L${x1.toFixed(1)} ${y1.toFixed(1)} A${R} ${R} 0 ${large} 1 ${x2.toFixed(1)} ${y2.toFixed(1)} Z" fill="${PALETTE[i%8]}" stroke="var(--card)" stroke-width="2"><title>${esc(d[0])}: ${fmtNum(d[1])} (${(frac*100).toFixed(1)}%)</title></path>`;
+    const ly=40+i*30;
+    leg+=`<rect x="410" y="${ly-10}" width="14" height="14" rx="3" fill="${PALETTE[i%8]}"/><text x="432" y="${ly+1}" font-size="12" fill="${st.text}">${esc(d[0].length>20?d[0].slice(0,19)+'…':d[0])} — ${(frac*100).toFixed(1)}%</text>`;
+    ang=a2;
+  });
+  return svgWrap(`${paths}<circle cx="${cxp}" cy="${cyp}" r="70" fill="var(--card)"/>${leg}`,W,H);
+}
+function chartHist(){
+  const x=$('#chX').value, bins=Math.max(2,Math.min(60,+$('#chBins').value||12));
+  const grpKey=$('#chColor')?$('#chColor').value:'';
+  const grpCol=grpKey?colByKey(grpKey):null;
+  if(grpKey && grpCol && grpCol.type!=='number'){
+    // grouped/overlaid histograms per category
+    const rows=baseRows().filter(r=>typeof r[x]==='number'&&!Number.isNaN(r[x])&&r[grpKey]!=null&&r[grpKey]!=='');
+    if(!rows.length)return note();
+    const all=rows.map(r=>r[x]);const min=Math.min(...all),max=Math.max(...all),span=(max-min)||1;
+    const cats=[...new Set(rows.map(r=>String(r[grpKey])))].slice(0,8);
+    const series=cats.map(c=>{const h=new Array(bins).fill(0);for(const r of rows)if(String(r[grpKey])===c){let b=Math.floor((r[x]-min)/span*bins);if(b>=bins)b=bins-1;if(b<0)b=0;h[b]++;}return {c,h};});
+    const W=880,H=440,pad={l:64,r:150,t:24,b:64},st=axisStyle();
+    const hmax=Math.max(...series.flatMap(s=>s.h)),ticks=niceTicks(0,hmax,6),tmax=Math.max(hmax,...ticks);
+    const sc=v=>pad.t+(H-pad.t-pad.b)*(1-v/(tmax||1));
+    const bw=(W-pad.l-pad.r)/bins; let g='',bars='',ax='',leg='';
+    for(const t of ticks){const yy=sc(t);g+=`<line x1="${pad.l}" y1="${yy}" x2="${W-pad.r}" y2="${yy}" stroke="${st.grid}"/><text x="${pad.l-8}" y="${yy+4}" text-anchor="end" font-size="11" fill="${st.text}">${fmtNum(t)}</text>`;}
+    series.forEach((s,si)=>{s.h.forEach((c,i)=>{if(!c)return;const bx=pad.l+i*bw,vy=sc(c);bars+=`<rect x="${(bx+1).toFixed(1)}" y="${vy.toFixed(1)}" width="${(bw-2).toFixed(1)}" height="${(sc(0)-vy).toFixed(1)}" fill="${PALETTE[si%8]}" opacity="0.5" rx="1"><title>${esc(s.c)} · [${fmtNum(min+i*span/bins)} – ${fmtNum(min+(i+1)*span/bins)}]: ${c}</title></rect>`;});
+      leg+=`<rect x="${W-pad.r+12}" y="${pad.t+si*20}" width="12" height="12" rx="2" fill="${PALETTE[si%8]}" opacity="0.7"/><text x="${W-pad.r+30}" y="${pad.t+si*20+10}" font-size="11" fill="${st.text}">${esc(s.c.length>16?s.c.slice(0,15)+'…':s.c)}</text>`;});
+    for(let i=0;i<=4;i++){const v=min+span*i/4,xx=pad.l+(W-pad.l-pad.r)*i/4;ax+=`<text x="${xx.toFixed(1)}" y="${H-pad.b+18}" text-anchor="middle" font-size="11" fill="${st.text}">${fmtNum(v)}</text>`;}
+    lastRegNote=`${T().groupByHist}: ${esc(grpCol.name)} · ${cats.length} ${T().none==='(none)'?'groups':'categorii'}`;
+    return svgWrap(`${g}<line x1="${pad.l}" y1="${sc(0)}" x2="${W-pad.r}" y2="${sc(0)}" stroke="${st.axis}" stroke-width="1.5"/>${bars}${ax}${leg}`,W,H);
+  }
+  const vals=numericValues(x); if(!vals.length)return note();
+  const min=Math.min(...vals),max=Math.max(...vals),span=(max-min)||1;
+  const hist=new Array(bins).fill(0);
+  for(const v of vals){let b=Math.floor((v-min)/span*bins);if(b>=bins)b=bins-1;if(b<0)b=0;hist[b]++;}
+  const W=860,H=440,pad={l:64,r:24,t:24,b:64},st=axisStyle();
+  const hmax=Math.max(...hist),ticks=niceTicks(0,hmax,6),tmax=Math.max(hmax,...ticks);
+  const sc=v=>pad.t+(H-pad.t-pad.b)*(1-v/(tmax||1));
+  const bw=(W-pad.l-pad.r)/bins; let g='',bars='',ax='';
+  for(const t of ticks){const y2=sc(t);g+=`<line x1="${pad.l}" y1="${y2}" x2="${W-pad.r}" y2="${y2}" stroke="${st.grid}"/><text x="${pad.l-8}" y="${y2+4}" text-anchor="end" font-size="11" fill="${st.text}">${fmtNum(t)}</text>`;}
+  hist.forEach((c,i)=>{const bx=pad.l+i*bw,vy=sc(c);bars+=`<rect x="${(bx+1).toFixed(1)}" y="${vy.toFixed(1)}" width="${(bw-2).toFixed(1)}" height="${(sc(0)-vy).toFixed(1)}" fill="var(--c1)" rx="1"><title>[${fmtNum(min+i*span/bins)} – ${fmtNum(min+(i+1)*span/bins)}]: ${c}</title></rect>`;});
+  for(let i=0;i<=4;i++){const v=min+span*i/4,xx=pad.l+(W-pad.l-pad.r)*i/4;ax+=`<text x="${xx.toFixed(1)}" y="${H-pad.b+18}" text-anchor="middle" font-size="11" fill="${st.text}">${fmtNum(v)}</text>`;}
+  // overlays
+  const showNorm=$('#chNorm')&&$('#chNorm').checked, showMM=$('#chMeanMed')&&$('#chMeanMed').checked;
+  const mean=vals.reduce((a,b)=>a+b,0)/vals.length;
+  const std=Math.sqrt(vals.reduce((a,b)=>a+(b-mean)**2,0)/(vals.length>1?vals.length-1:1));
+  const median=quantile(vals.slice().sort((a,b)=>a-b),.5);
+  const xPix=v=>pad.l+(W-pad.l-pad.r)*(v-min)/span;
+  let over='';
+  if(showNorm && std>0){
+    const binW=span/bins,N=72; let d='';
+    for(let i=0;i<=N;i++){const xv=min+span*i/N;const pdf=Math.exp(-((xv-mean)**2)/(2*std*std))/(std*Math.sqrt(2*Math.PI));const cnt=vals.length*binW*pdf;d+=(d?'L':'M')+xPix(xv).toFixed(1)+' '+sc(cnt).toFixed(1)+' ';}
+    over+=`<path d="${d}" fill="none" stroke="var(--accent-2)" stroke-width="2.2" opacity="0.9"/>`;
+  }
+  if(showMM){
+    over+=`<line x1="${xPix(mean).toFixed(1)}" y1="${pad.t}" x2="${xPix(mean).toFixed(1)}" y2="${sc(0)}" stroke="var(--accent)" stroke-width="1.8" stroke-dasharray="6 3"><title>μ ${fmtNum(mean)}</title></line>`;
+    over+=`<line x1="${xPix(median).toFixed(1)}" y1="${pad.t}" x2="${xPix(median).toFixed(1)}" y2="${sc(0)}" stroke="var(--gold)" stroke-width="1.8" stroke-dasharray="2 3"><title>med ${fmtNum(median)}</title></line>`;
+  }
+  if(showNorm||showMM)lastRegNote=`μ = ${fmtNum(mean)} &nbsp;·&nbsp; med = ${fmtNum(median)} &nbsp;·&nbsp; σ = ${fmtNum(std)} &nbsp;·&nbsp; n = ${vals.length}`;
+  return svgWrap(`${g}<line x1="${pad.l}" y1="${sc(0)}" x2="${W-pad.r}" y2="${sc(0)}" stroke="${st.axis}" stroke-width="1.5"/>${bars}${over}${ax}`,W,H);
+}
+function chartScatter(){
+  const x=$('#chX').value,y=$('#chY').value,col=$('#chColor').value, trend=$('#chTrend').checked;
+  const pts=baseRows().map(r=>({x:r[x],y:r[y],c:col?r[col]:null})).filter(p=>typeof p.x==='number'&&typeof p.y==='number'&&!Number.isNaN(p.x)&&!Number.isNaN(p.y));
+  if(!pts.length)return note();
+  const W=860,H=480,pad={l:70,r:24,t:24,b:60},st=axisStyle();
+  const xs=pts.map(p=>p.x),ys=pts.map(p=>p.y);
+  const xmin=Math.min(...xs),xmax=Math.max(...xs),ymin=Math.min(...ys),ymax=Math.max(...ys);
+  const xt=niceTicks(xmin,xmax,6),yt=niceTicks(ymin,ymax,6);
+  const xlo=Math.min(xmin,...xt),xhi=Math.max(xmax,...xt),ylo=Math.min(ymin,...yt),yhi=Math.max(ymax,...yt);
+  const sx=v=>pad.l+(W-pad.l-pad.r)*(v-xlo)/((xhi-xlo)||1);
+  const sy=v=>pad.t+(H-pad.t-pad.b)*(1-(v-ylo)/((yhi-ylo)||1));
+  let g='',dots='';
+  for(const t of yt){const yy=sy(t);g+=`<line x1="${pad.l}" y1="${yy}" x2="${W-pad.r}" y2="${yy}" stroke="${st.grid}"/><text x="${pad.l-8}" y="${yy+4}" text-anchor="end" font-size="11" fill="${st.text}">${fmtNum(t)}</text>`;}
+  for(const t of xt){const xx=sx(t);g+=`<line x1="${xx}" y1="${pad.t}" x2="${xx}" y2="${H-pad.b}" stroke="${st.grid}"/><text x="${xx}" y="${H-pad.b+18}" text-anchor="middle" font-size="11" fill="${st.text}">${fmtNum(t)}</text>`;}
+  const cats=col?[...new Set(pts.map(p=>String(p.c)))]:null;
+  for(const p of pts){const ci=cats?cats.indexOf(String(p.c)):0;dots+=`<circle cx="${sx(p.x).toFixed(1)}" cy="${sy(p.y).toFixed(1)}" r="4" fill="${PALETTE[ci%8]}" opacity="0.72"><title>(${fmtNum(p.x)}, ${fmtNum(p.y)})${p.c!=null?' · '+esc(String(p.c)):''}</title></circle>`;}
+  let leg='';
+  if(cats&&cats.length<=8)cats.forEach((c,i)=>{leg+=`<circle cx="${W-pad.r-130}" cy="${pad.t+12+i*18}" r="5" fill="${PALETTE[i%8]}"/><text x="${W-pad.r-118}" y="${pad.t+16+i*18}" font-size="11" fill="${st.text}">${esc(c.length>16?c.slice(0,15)+'…':c)}</text>`;});
+  let regLine='',ciBand='',piBand='';
+  lastRegNote='';
+  if(trend && pts.length>=2){
+    const fitType=$('#chFit').value;
+    const fit=fitCurve(xs,ys,fitType);
+    if(fit){
+      if(fitType==='linear' && pts.length>=3 && (($('#chCI')&&$('#chCI').checked)||($('#chPI')&&$('#chPI').checked))){
+        const ci=linRegCI(xs,ys);
+        if(ci){
+          const N=64;
+          const band=(hwFn)=>{const up=[],dn=[];for(let i=0;i<=N;i++){const xv=xlo+(xhi-xlo)*i/N;const m=ci.fit(xv),hw=hwFn(xv);up.push([xv,m+hw]);dn.push([xv,m-hw]);}
+            let d='M';up.forEach((p,i)=>{d+=(i?'L':'')+sx(p[0]).toFixed(1)+' '+sy(p[1]).toFixed(1)+' ';});
+            for(let i=dn.length-1;i>=0;i--)d+='L'+sx(dn[i][0]).toFixed(1)+' '+sy(dn[i][1]).toFixed(1)+' ';return d+'Z';};
+          if($('#chPI')&&$('#chPI').checked)piBand=`<path d="${band(ci.predHalfWidth)}" fill="var(--accent-2)" opacity="0.10" stroke="none"/>`;
+          if($('#chCI')&&$('#chCI').checked)ciBand=`<path d="${band(ci.halfWidth)}" fill="var(--accent)" opacity="0.14" stroke="none"/>`;
+        }
+      }
+      const N=64; let d='';
+      for(let i=0;i<=N;i++){const xv=xlo+(xhi-xlo)*i/N;const yv=fit.fn(xv);if(yv==null||!isFinite(yv))continue;d+=(d?'L':'M')+sx(xv).toFixed(1)+' '+sy(yv).toFixed(1)+' ';}
+      if(d)regLine=`<path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-dasharray="7 4" opacity="0.9"/>`;
+      lastRegNote=`${fit.label} &nbsp;·&nbsp; R² = <b>${fit.r2.toFixed(4)}</b> &nbsp;·&nbsp; n = ${fit.n}`;
+    }
+  }
+  return svgWrap(`${g}${piBand}${ciBand}${regLine}${dots}${leg}`,W,H);
+}
+const T_TABLES={
+  90:{1:6.314,2:2.920,3:2.353,4:2.132,5:2.015,6:1.943,7:1.895,8:1.860,9:1.833,10:1.812,12:1.782,15:1.753,20:1.725,25:1.708,30:1.697,40:1.684,60:1.671,120:1.658,inf:1.645},
+  95:{1:12.706,2:4.303,3:3.182,4:2.776,5:2.571,6:2.447,7:2.365,8:2.306,9:2.262,10:2.228,12:2.179,15:2.131,20:2.086,25:2.060,30:2.042,40:2.021,60:2.000,120:1.980,inf:1.96},
+  99:{1:63.657,2:9.925,3:5.841,4:4.604,5:4.032,6:3.707,7:3.499,8:3.355,9:3.250,10:3.169,12:3.055,15:2.947,20:2.845,25:2.787,30:2.750,40:2.704,60:2.660,120:2.617,inf:2.576}
+};
+function tCrit(df,level){
+  const tbl=T_TABLES[level]||T_TABLES[95];
+  if(df>=120)return tbl.inf;
+  if(tbl[df])return tbl[df];
+  const ks=Object.keys(tbl).filter(k=>k!=='inf').map(Number).sort((a,b)=>a-b);
+  let lo=ks[0],hi=ks[ks.length-1];
+  for(const k of ks){if(k<=df)lo=k;if(k>=df){hi=k;break;}}
+  if(lo===hi)return tbl[lo];
+  return tbl[lo]+(tbl[hi]-tbl[lo])*(df-lo)/(hi-lo);
+}
+function linRegCI(xs,ys){
+  const n=xs.length; if(n<3)return null;
+  const r=linReg(xs,ys); if(!r)return null;
+  const mx=xs.reduce((a,b)=>a+b,0)/n;
+  let sxx=0,sse=0;
+  for(let i=0;i<n;i++){sxx+=(xs[i]-mx)**2;const yh=r.slope*xs[i]+r.intercept;sse+=(ys[i]-yh)**2;}
+  if(sxx===0)return null;
+  const level=+(($('#chConf')&&$('#chConf').value)||95);
+  const s=Math.sqrt(sse/(n-2)),t=tCrit(n-2,level);
+  return {level, fit:x=>r.slope*x+r.intercept,
+    halfWidth:x0=>t*s*Math.sqrt(1/n+((x0-mx)**2)/sxx),
+    predHalfWidth:x0=>t*s*Math.sqrt(1+1/n+((x0-mx)**2)/sxx)};
+}
+function solveLinear(A,b){
+  const n=b.length;
+  for(let i=0;i<n;i++){
+    let p=i;for(let r=i+1;r<n;r++)if(Math.abs(A[r][i])>Math.abs(A[p][i]))p=r;
+    if(Math.abs(A[p][i])<1e-12)return null;
+    [A[i],A[p]]=[A[p],A[i]];[b[i],b[p]]=[b[p],b[i]];
+    for(let r=0;r<n;r++){if(r===i)continue;const f=A[r][i]/A[i][i];for(let c=i;c<n;c++)A[r][c]-=f*A[i][c];b[r]-=f*b[i];}
+  }
+  return b.map((v,i)=>v/A[i][i]);
+}
+function polyFit(xs,ys,deg){
+  const n=xs.length; if(n<deg+1)return null;
+  const m=deg+1, A=[],bb=[];
+  // sums of powers up to 2*deg
+  const sp=new Array(2*deg+1).fill(0);
+  for(let p=0;p<=2*deg;p++)for(let i=0;i<n;i++)sp[p]+=Math.pow(xs[i],p);
+  for(let r=0;r<m;r++){A.push([]);for(let c=0;c<m;c++)A[r].push(sp[r+c]);
+    let s=0;for(let i=0;i<n;i++)s+=ys[i]*Math.pow(xs[i],r);bb.push(s);}
+  const coef=solveLinear(A,bb); if(!coef)return null;
+  const fn=x=>coef.reduce((acc,c,i)=>acc+c*Math.pow(x,i),0);
+  return {coef,fn};
+}
+let lastRegNote='';
+function linReg(xs,ys){
+  const n=xs.length; if(n<2)return null;
+  const mx=xs.reduce((a,b)=>a+b,0)/n, my=ys.reduce((a,b)=>a+b,0)/n;
+  let sxy=0,sxx=0,syy=0;
+  for(let i=0;i<n;i++){const dx=xs[i]-mx,dy=ys[i]-my;sxy+=dx*dy;sxx+=dx*dx;syy+=dy*dy;}
+  if(sxx===0)return null;
+  const slope=sxy/sxx, intercept=my-slope*mx;
+  const r=(sxx&&syy)?sxy/Math.sqrt(sxx*syy):0;
+  return {slope,intercept,r,r2:r*r};
+}
+function fitCurve(xs,ys,type){
+  if(xs.length<2)return null;
+  const pairs=xs.map((x,i)=>[x,ys[i]]);
+  let fn,label;
+  if(type==='log'){
+    const f=pairs.filter(p=>p[0]>0); if(f.length<2)return null;
+    const r=linReg(f.map(p=>Math.log(p[0])),f.map(p=>p[1])); if(!r)return null;
+    fn=x=>x>0?r.slope*Math.log(x)+r.intercept:null;
+    const s=r.intercept>=0?'+':'−'; label=`y = ${fmtNum(r.slope)}·ln(x) ${s} ${fmtNum(Math.abs(r.intercept))}`;
+  } else if(type==='exp'){
+    const f=pairs.filter(p=>p[1]>0); if(f.length<2)return null;
+    const r=linReg(f.map(p=>p[0]),f.map(p=>Math.log(p[1]))); if(!r)return null;
+    const b=Math.exp(r.intercept),a=r.slope; fn=x=>b*Math.exp(a*x);
+    label=`y = ${fmtNum(b)}·e^(${fmtNum(a)}·x)`;
+  } else if(type==='pow'){
+    const f=pairs.filter(p=>p[0]>0&&p[1]>0); if(f.length<2)return null;
+    const r=linReg(f.map(p=>Math.log(p[0])),f.map(p=>Math.log(p[1]))); if(!r)return null;
+    const b=Math.exp(r.intercept),a=r.slope; fn=x=>x>0?b*Math.pow(x,a):null;
+    label=`y = ${fmtNum(b)}·x^${fmtNum(a)}`;
+  } else if(type==='poly2'||type==='poly3'){
+    const deg=type==='poly2'?2:3;
+    const pf=polyFit(xs,ys,deg); if(!pf)return null;
+    fn=x=>pf.fn(x);
+    const terms=pf.coef.map((c,i)=>i===0?fmtNum(c):`${c>=0?'+':'−'} ${fmtNum(Math.abs(c))}·x${i>1?'^'+i:''}`);
+    label='y = '+terms.join(' ');
+  } else {
+    const r=linReg(xs,ys); if(!r)return null;
+    fn=x=>r.slope*x+r.intercept;
+    const s=r.intercept>=0?'+':'−'; label=`y = ${fmtNum(r.slope)}·x ${s} ${fmtNum(Math.abs(r.intercept))}`;
+  }
+  const valid=pairs.filter(p=>{const v=fn(p[0]);return v!=null&&isFinite(v);});
+  if(valid.length<2)return null;
+  const my=valid.reduce((s,p)=>s+p[1],0)/valid.length;
+  let ssr=0,sst=0; for(const p of valid){const yh=fn(p[0]);ssr+=(p[1]-yh)**2;sst+=(p[1]-my)**2;}
+  return {fn,label,r2:sst?1-ssr/sst:0,n:valid.length};
+}
+function chartLine(){
+  const x=$('#chX').value,y=$('#chY').value;
+  const cx=colByKey(x);
+  let data;
+  if(cx&&cx.type==='number'||cx&&cx.type==='date'){
+    data=baseRows().map(r=>({x:cx.type==='date'?Date.parse(r[x]):r[x],lx:r[x],y:r[y]}))
+      .filter(p=>p.x!=null&&!Number.isNaN(p.x)&&typeof p.y==='number'&&!Number.isNaN(p.y))
+      .sort((a,b)=>a.x-b.x);
+  } else {
+    const agg=$('#chAgg').value;
+    const grouped=groupAgg(x,y,agg,cx?cx.type:'string');
+    grouped.sort((a,b)=>String(a[0]).localeCompare(String(b[0]),lang,{numeric:true}));
+    data=grouped.map((d,i)=>({x:i,lx:d[0],y:d[1]}));
+  }
+  if(data.length<2)return note();
+  const W=880,H=440,pad={l:70,r:24,t:24,b:70},st=axisStyle();
+  const xs=data.map(p=>p.x),ys=data.map(p=>p.y);
+  const xmin=Math.min(...xs),xmax=Math.max(...xs),ymin=Math.min(...ys),ymax=Math.max(...ys);
+  const yt=niceTicks(ymin,ymax,6),ylo=Math.min(ymin,...yt),yhi=Math.max(ymax,...yt);
+  const sx=v=>pad.l+(W-pad.l-pad.r)*(v-xmin)/((xmax-xmin)||1);
+  const sy=v=>pad.t+(H-pad.t-pad.b)*(1-(v-ylo)/((yhi-ylo)||1));
+  let g='';
+  for(const t of yt){const yy=sy(t);g+=`<line x1="${pad.l}" y1="${yy}" x2="${W-pad.r}" y2="${yy}" stroke="${st.grid}"/><text x="${pad.l-8}" y="${yy+4}" text-anchor="end" font-size="11" fill="${st.text}">${fmtNum(t)}</text>`;}
+  const path=data.map((p,i)=>(i?'L':'M')+sx(p.x).toFixed(1)+' '+sy(p.y).toFixed(1)).join(' ');
+  let maPath='';
+  const useMA=$('#chMA')&&$('#chMA').checked, win=Math.max(2,Math.min(50,+($('#chMAWin')?$('#chMAWin').value:3)||3));
+  if(useMA && data.length>=win){
+    let d='',started=false;
+    for(let i=win-1;i<data.length;i++){let s=0;for(let k=0;k<win;k++)s+=data[i-k].y;const avg=s/win;d+=(started?'L':'M')+sx(data[i].x).toFixed(1)+' '+sy(avg).toFixed(1)+' ';started=true;}
+    maPath=`<path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="6 3" opacity="0.85"/>`;
+    lastRegNote=`${T().movAvg} · ${T().maWin} = ${win}`;
+  }
+  let dots='';
+  const step=Math.ceil(data.length/40);
+  data.forEach((p,i)=>{if(i%step===0||i===data.length-1)dots+=`<circle cx="${sx(p.x).toFixed(1)}" cy="${sy(p.y).toFixed(1)}" r="3" fill="var(--c2)"><title>${esc(String(p.lx))}: ${fmtNum(p.y)}</title></circle>`;});
+  let xl='';
+  const n=Math.min(8,data.length);
+  for(let i=0;i<n;i++){const idx=Math.round(i*(data.length-1)/(n-1)),p=data[idx];const lab=String(p.lx);const xx=sx(p.x);xl+=`<text x="${xx.toFixed(1)}" y="${H-pad.b+18}" text-anchor="middle" font-size="10" fill="${st.text}">${esc(lab.length>12?lab.slice(0,11)+'…':lab)}</text>`;}
+  return svgWrap(`${g}<path d="${path}" fill="none" stroke="var(--c2)" stroke-width="2.5"/>${maPath}${dots}${xl}`,W,H);
+}
+function chartBox(){
+  // Y numeric, optional X category to group
+  const x=$('#chX').value,y=$('#chY').value;
+  const cy=colByKey(y); if(!cy||cy.type!=='number')return note();
+  const cx=colByKey(x);
+  const groups=new Map();
+  if(cx && cx.type!=='number'){
+    for(const r of baseRows()){const k=r[x];if(k==null||k==='')continue;const v=r[y];if(typeof v==='number'&&!Number.isNaN(v)){const ks=String(k);if(!groups.has(ks))groups.set(ks,[]);groups.get(ks).push(v);}}
+  } else {
+    groups.set(cy.name, numericValues(y));
+  }
+  let entries=[...groups.entries()].filter(e=>e[1].length).slice(0,18);
+  if(!entries.length)return note();
+  const stats=entries.map(([k,arr])=>{const s=arr.slice().sort((a,b)=>a-b);const q1=quantile(s,.25),med=quantile(s,.5),q3=quantile(s,.75),iqr=q3-q1;
+    const loF=q1-1.5*iqr,hiF=q3+1.5*iqr;const inl=s.filter(v=>v>=loF&&v<=hiF);
+    const wlo=inl.length?inl[0]:s[0],whi=inl.length?inl[inl.length-1]:s[s.length-1];
+    const out=s.filter(v=>v<loF||v>hiF);return {k,q1,med,q3,wlo,whi,out,min:s[0],max:s[s.length-1]};});
+  const allLo=Math.min(...stats.map(s=>Math.min(s.wlo,...s.out,s.min))),allHi=Math.max(...stats.map(s=>Math.max(s.whi,...s.out,s.max)));
+  const W=Math.max(560,Math.min(1100,entries.length*84+150)),H=460,pad={l:72,r:24,t:24,b:120},st=axisStyle();
+  const yt=niceTicks(allLo,allHi,6),ylo=Math.min(allLo,...yt),yhi=Math.max(allHi,...yt);
+  const sy=v=>pad.t+(H-pad.t-pad.b)*(1-(v-ylo)/((yhi-ylo)||1));
+  const bw=(W-pad.l-pad.r)/entries.length;
+  let g='',boxes='';
+  for(const t of yt){const yy=sy(t);g+=`<line x1="${pad.l}" y1="${yy}" x2="${W-pad.r}" y2="${yy}" stroke="${st.grid}"/><text x="${pad.l-8}" y="${yy+4}" text-anchor="end" font-size="11" fill="${st.text}">${fmtNum(t)}</text>`;}
+  stats.forEach((s,i)=>{
+    const cxp=pad.l+i*bw+bw/2, half=Math.min(34,bw*0.28), col=PALETTE[i%8];
+    boxes+=`<line x1="${cxp}" y1="${sy(s.whi).toFixed(1)}" x2="${cxp}" y2="${sy(s.q3).toFixed(1)}" stroke="${st.axis}"/>`;
+    boxes+=`<line x1="${cxp}" y1="${sy(s.wlo).toFixed(1)}" x2="${cxp}" y2="${sy(s.q1).toFixed(1)}" stroke="${st.axis}"/>`;
+    boxes+=`<line x1="${cxp-half/1.6}" y1="${sy(s.whi).toFixed(1)}" x2="${cxp+half/1.6}" y2="${sy(s.whi).toFixed(1)}" stroke="${st.axis}"/>`;
+    boxes+=`<line x1="${cxp-half/1.6}" y1="${sy(s.wlo).toFixed(1)}" x2="${cxp+half/1.6}" y2="${sy(s.wlo).toFixed(1)}" stroke="${st.axis}"/>`;
+    boxes+=`<rect x="${(cxp-half).toFixed(1)}" y="${sy(s.q3).toFixed(1)}" width="${(half*2).toFixed(1)}" height="${Math.abs(sy(s.q1)-sy(s.q3)).toFixed(1)}" fill="${col}" opacity="0.55" stroke="${col}"><title>${esc(s.k)} · Q1 ${fmtNum(s.q1)} · med ${fmtNum(s.med)} · Q3 ${fmtNum(s.q3)}</title></rect>`;
+    boxes+=`<line x1="${(cxp-half).toFixed(1)}" y1="${sy(s.med).toFixed(1)}" x2="${(cxp+half).toFixed(1)}" y2="${sy(s.med).toFixed(1)}" stroke="${st.text}" stroke-width="2"/>`;
+    s.out.forEach(o=>{boxes+=`<circle cx="${cxp}" cy="${sy(o).toFixed(1)}" r="2.6" fill="none" stroke="${col}"><title>${fmtNum(o)}</title></circle>`;});
+    const ly=H-pad.b+14, lab=String(s.k).length>14?String(s.k).slice(0,13)+'…':s.k;
+    boxes+=`<text x="${cxp}" y="${ly}" transform="rotate(45 ${cxp} ${ly})" font-size="11" fill="${st.text}">${esc(lab)}</text>`;
+  });
+  return svgWrap(`${g}${boxes}`,W,H);
+}
+function chartHeat(){
+  // X category, color field = Y category, value+agg
+  const x=$('#chX').value, ycat=$('#chColor').value, val=$('#chY').value, agg=$('#chAgg').value;
+  if(!ycat)return `<div class="empty-note">${T().needTwoNumChart}</div>`;
+  const ct=crossTab(x,ycat,val,agg);
+  const cols=ct.cats.slice(0,24), rows=ct.series.slice(0,24);
+  if(!cols.length||!rows.length)return note();
+  let lo=Infinity,hi=-Infinity;
+  for(const c of cols)for(const r of rows){const v=ct.get(c,r);if(v!=null){lo=Math.min(lo,v);hi=Math.max(hi,v);}}
+  if(!isFinite(lo))return note();
+  const st=axisStyle(),cell=Math.min(60,Math.max(26,Math.round(760/cols.length)));
+  const labL=130,labT=120,W=labL+cols.length*cell+20,H=labT+rows.length*cell+20;
+  const x0=labL,y0=labT;
+  const color=v=>{const a=(hi-lo)?(v-lo)/(hi-lo):0.5;return `rgba(${Math.round(31+a*(224-31))},${Math.round(94-a*35)},${Math.round(87-a*8)},${(0.18+a*0.82).toFixed(2)})`;};
+  let cells='',labels='';
+  cols.forEach((c,j)=>{const lx=x0+j*cell+cell/2;labels+=`<text x="${lx}" y="${y0-8}" text-anchor="start" font-size="11" fill="${st.text}" transform="rotate(-45 ${lx} ${y0-8})">${esc(String(c).length>16?c.slice(0,15)+'…':c)}</text>`;});
+  rows.forEach((r,i)=>{
+    labels+=`<text x="${x0-8}" y="${y0+i*cell+cell/2+4}" text-anchor="end" font-size="11" fill="${st.text}">${esc(String(r).length>18?r.slice(0,17)+'…':r)}</text>`;
+    cols.forEach((c,j)=>{const v=ct.get(c,r);const cxv=x0+j*cell,cyv=y0+i*cell;
+      cells+=`<rect x="${cxv}" y="${cyv}" width="${cell-1}" height="${cell-1}" fill="${v==null?getCol('--paper-2'):color(v)}" stroke="${st.grid}"><title>${esc(c)} · ${esc(r)}: ${v==null?'—':fmtNum(v)}</title></rect>`;
+      if(cell>=40&&v!=null)cells+=`<text x="${cxv+cell/2}" y="${cyv+cell/2+4}" text-anchor="middle" font-size="9" fill="${st.text}">${fmtNum(v)}</text>`;});
+  });
+  return svgWrap(`${labels}${cells}`,W,H);
+}
+function note(){return `<div class="empty-note">${T().pickFields}</div>`;}
+function renderChart(){
+  const type=$('#chType').value;
+  const show=(id,on)=>{$(id).style.display=on?'flex':'none';};
+  const colCx=colByKey($('#chX').value);
+  show('#fX', true);
+  show('#fY', type!=='hist'&&type!=='pie'||type==='pie'); // pie uses Y as value
+  show('#fY', type!=='hist');
+  show('#fAgg', ['bar','pie','line','heat','box'].includes(type) && type!=='box');
+  show('#fColor', ['scatter','bar','heat','hist'].includes(type));
+  show('#fBins', type==='hist');
+  show('#fTopN', type==='bar');
+  show('#fHoriz', type==='bar');
+  show('#fLabels', type==='bar');
+  show('#fStack', type==='bar' && !!$('#chColor').value);
+  show('#fTrend', type==='scatter');
+  show('#fFit', type==='scatter' && $('#chTrend').checked);
+  show('#fCI', type==='scatter' && $('#chTrend').checked && $('#chFit').value==='linear');
+  show('#fPI', type==='scatter' && $('#chTrend').checked && $('#chFit').value==='linear');
+  show('#fConf', type==='scatter' && $('#chTrend').checked && $('#chFit').value==='linear' && ($('#chCI').checked||$('#chPI').checked));
+  show('#fNorm', type==='hist' && !$('#chColor').value);
+  show('#fMeanMed', type==='hist' && !$('#chColor').value);
+  show('#fMA', type==='line');
+  show('#fMAWin', type==='line' && $('#chMA').checked);
+  // relabel
+  const xl=$('#fX').querySelector('label'), yl=$('#fY').querySelector('label'), cl=$('#fColor').querySelector('label');
+  xl.textContent = (type==='hist')?T().axisY : (type==='box')?T().axisX : T().axisX;
+  yl.textContent = T().axisY;
+  if(cl) cl.textContent = (type==='heat')?T().axisY : (type==='hist')?T().groupByHist : T().colorBy;
+  lastRegNote='';
+  let svg;
+  try{
+    svg = type==='bar'?chartBar(): type==='line'?chartLine(): type==='scatter'?chartScatter():
+          type==='hist'?chartHist(): type==='box'?chartBox(): type==='heat'?chartHeat(): chartPie();
+  }catch(e){svg=note();}
+  $('#chartHolder').innerHTML=(svg||note()) + (lastRegNote?`<div class="reg-note">${lastRegNote}</div>`:'');
+}
+
+/* ========================== PIVOT ========================== */
+function renderPivot(){
+  const rowK=$('#pvRow').value,colK=$('#pvCol').value,valK=$('#pvVal').value,agg=$('#pvAgg').value;
+  if(!rowK){$('#pivotOut').innerHTML=`<div class="empty-note">${T().pickFields}</div>`;return;}
+  const rowVals=[],colVals=[],cells=new Map();
+  const rowSet=new Set(),colSet=new Set();
+  for(const r of baseRows()){
+    const rv=r[rowK]==null?T().none:String(r[rowK]);
+    const cv=colK?(r[colK]==null?T().none:String(r[colK])):'__all__';
+    rowSet.add(rv);colSet.add(cv);
+    const key=rv+'\u0001'+cv; if(!cells.has(key))cells.set(key,[]);
+    const v=r[valK]; if(typeof v==='number'&&!Number.isNaN(v))cells.get(key).push(v); else if(agg==='count')cells.get(key).push(1);
+  }
+  const rows=[...rowSet].sort((a,b)=>a.localeCompare(b,lang,{numeric:true}));
+  const cols=colK?[...colSet].sort((a,b)=>a.localeCompare(b,lang,{numeric:true})):['__all__'];
+  const aggF=arr=>aggregate(arr,agg);
+  const valName=state.columns.find(c=>c.key===valK)?.name||T().count;
+  let h='<table><thead><tr><th>'+esc(state.columns.find(c=>c.key===rowK).name)+'</th>';
+  for(const c of cols)h+=`<th class="num">${colK?esc(c):esc(valName)}</th>`;
+  if(colK)h+=`<th class="num gtot">${T().total}</th>`;
+  h+='</tr></thead><tbody>';
+  const colTot=new Array(cols.length).fill(null);let grand=[];
+  for(const rv of rows){
+    h+=`<tr><td>${esc(rv)}</td>`;let rowArr=[];
+    cols.forEach((cv,ci)=>{
+      const arr=cells.get(rv+'\u0001'+cv)||[];rowArr=rowArr.concat(arr);
+      const val=aggF(arr);
+      h+=`<td class="num">${val==null?'—':fmtNum(val)}</td>`;
+    });
+    if(colK){const rt=aggF(rowArr);h+=`<td class="num gtot">${rt==null?'—':fmtNum(rt)}</td>`;}
+    grand=grand.concat(rowArr);
+    h+='</tr>';
+  }
+  if(colK){
+    h+=`<tr><th class="gtot">${T().total}</th>`;
+    cols.forEach((cv)=>{const arr=[];for(const rv of rows)arr.push(...(cells.get(rv+'\u0001'+cv)||[]));const v=aggF(arr);h+=`<td class="num gtot">${v==null?'—':fmtNum(v)}</td>`;});
+    const g=aggF(grand);h+=`<td class="num gtot">${g==null?'—':fmtNum(g)}</td></tr>`;
+  }
+  h+='</tbody></table>';
+  $('#pivotOut').innerHTML=h;
+}
+
+/* ========================== CORRELATION ========================== */
+function pearson(a,b){
+  const n=a.length;if(n<2)return null;
+  const ma=a.reduce((x,y)=>x+y,0)/n,mb=b.reduce((x,y)=>x+y,0)/n;
+  let num=0,da=0,db=0;
+  for(let i=0;i<n;i++){const x=a[i]-ma,y=b[i]-mb;num+=x*y;da+=x*x;db+=y*y;}
+  const d=Math.sqrt(da*db);return d===0?0:num/d;
+}
+function rankArray(arr){
+  // average ranks, handling ties
+  const idx=arr.map((v,i)=>[v,i]).sort((p,q)=>p[0]-q[0]);
+  const ranks=new Array(arr.length);
+  let i=0;
+  while(i<idx.length){let j=i;while(j+1<idx.length&&idx[j+1][0]===idx[i][0])j++;
+    const r=(i+j)/2+1; for(let k=i;k<=j;k++)ranks[idx[k][1]]=r; i=j+1;}
+  return ranks;
+}
+function corrPair(a,b,method){
+  if(method==='spearman')return pearson(rankArray(a),rankArray(b));
+  return pearson(a,b);
+}
+function renderCorr(){
+  const nums=visibleColumns().filter(c=>c.type==='number');
+  if(nums.length<2){$('#corrHolder').innerHTML=`<div class="empty-note">${T().needTwoNum}</div>`;return;}
+  const method=($('#corrMethodSel')&&$('#corrMethodSel').value)||'pearson';
+  const cols=nums.slice(0,14);
+  const m=cols.map(ci=>cols.map(cj=>{
+    const pairs=baseRows().map(r=>[r[ci.key],r[cj.key]]).filter(p=>typeof p[0]==='number'&&typeof p[1]==='number'&&!Number.isNaN(p[0])&&!Number.isNaN(p[1]));
+    if(pairs.length<2)return null;
+    return corrPair(pairs.map(p=>p[0]),pairs.map(p=>p[1]),method);
+  }));
+  const k=cols.length,cell=Math.min(56,Math.max(30,Math.round(520/k)));
+  const labW=110,pad=12,W=labW+k*cell+pad+20,H=labW+k*cell+pad+20,st=axisStyle();
+  const x0=labW,y0=labW;
+  function color(v){
+    if(v==null)return getCol('--paper-2');
+    const a=Math.abs(v);
+    const base=v>=0?[154,59,31]:[31,94,87]; // accent / accent-2 in light; approximated
+    const c=v>=0?[224,121,79]:[92,189,174];
+    return `rgba(${v>=0?'180,90,55':'40,140,128'},${(0.15+a*0.8).toFixed(2)})`;
+  }
+  let cells='',labels='';
+  for(let i=0;i<k;i++){
+    labels+=`<text x="${x0-8}" y="${y0+i*cell+cell/2+4}" text-anchor="end" font-size="11" fill="${st.text}">${esc(cols[i].name.length>16?cols[i].name.slice(0,15)+'…':cols[i].name)}</text>`;
+    const lx=x0+i*cell+cell/2;
+    labels+=`<text x="${lx}" y="${y0-8}" text-anchor="start" font-size="11" fill="${st.text}" transform="rotate(-45 ${lx} ${y0-8})">${esc(cols[i].name.length>16?cols[i].name.slice(0,15)+'…':cols[i].name)}</text>`;
+    for(let j=0;j<k;j++){
+      const v=m[i][j];const cxv=x0+j*cell,cyv=y0+i*cell;
+      cells+=`<rect x="${cxv}" y="${cyv}" width="${cell-1}" height="${cell-1}" fill="${color(v)}" stroke="${st.grid}"><title>${esc(cols[i].name)} ↔ ${esc(cols[j].name)}: ${v==null?'—':v.toFixed(3)}</title></rect>`;
+      if(cell>=34&&v!=null)cells+=`<text x="${cxv+cell/2}" y="${cyv+cell/2+4}" text-anchor="middle" font-size="${cell>=44?11:9}" fill="${st.text}">${v.toFixed(2)}</text>`;
+    }
+  }
+  $('#corrHolder').innerHTML=svgWrap(`${labels}${cells}`,W,H);
+}
+
+/* ========================== EXPORT ========================== */
+function toCSV(headers,rows){
+  const q=v=>{if(v==null)return'';const s=String(v);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
+  return headers.map(q).join(',')+'\n'+rows.map(r=>r.map(q).join(',')).join('\n');
+}
+function download(name,content,mime){
+  const blob=new Blob([content],{type:mime||'text/plain;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast(T().dl+': '+name);
+}
+function exportCleanCSV(){
+  const cols=visibleColumns();
+  const headers=cols.map(c=>c.name);
+  const rows=visibleRows().map(({r})=>cols.map(c=>r[c.key]));
+  download((state.fileName.replace(/\.[^.]+$/,'')||'data')+'_export.csv',toCSV(headers,rows),'text/csv;charset=utf-8');
+}
+function exportJSON(){
+  const cols=visibleColumns();
+  const rows=visibleRows().map(({r})=>{const o={};cols.forEach(c=>o[c.name]=r[c.key]);return o;});
+  download((state.fileName.replace(/\.[^.]+$/,'')||'data')+'_export.json',JSON.stringify(rows,null,2),'application/json;charset=utf-8');
+}
+function exportStatsCSV(){
+  const headers=['column','type','n','missing','unique','mean','median','std','min','Q1','Q3','max','sum'];
+  const rows=visibleColumns().map(c=>{
+    if(c.type==='number'){const s=describeNumeric(c.key);
+      if(!s)return [c.name,c.type,0,baseRows().length,'','','','','','','','',''];
+      return [c.name,c.type,s.n,s.missing,'',s.mean,s.median,s.std,s.min,s.q1,s.q3,s.max,s.sum];}
+    const s=describeCategorical(c.key);
+    return [c.name,c.type,s.n,s.missing,s.unique,'','','','','','','',''];
+  });
+  download('dataweave_stats.csv',toCSV(headers,rows),'text/csv;charset=utf-8');
+}
+function currentChartData(){
+  const type=$('#chType').value, x=$('#chX').value, y=$('#chY').value, agg=$('#chAgg').value;
+  const cx=state.columns.find(c=>c.key===x), cy=state.columns.find(c=>c.key===y);
+  const nx=cx?cx.name:'x', ny=cy?cy.name:'y';
+  if(type==='hist'){
+    const bins=Math.max(2,Math.min(60,+$('#chBins').value||12)),vals=numericValues(x);
+    if(!vals.length)return null;const min=Math.min(...vals),max=Math.max(...vals),span=(max-min)||1;
+    const h=new Array(bins).fill(0);for(const v of vals){let b=Math.floor((v-min)/span*bins);if(b>=bins)b=bins-1;if(b<0)b=0;h[b]++;}
+    return {headers:['bin_start','bin_end','count'],rows:h.map((c,i)=>[min+i*span/bins,min+(i+1)*span/bins,c])};
+  }
+  if(type==='scatter'){
+    const col=$('#chColor').value,cc=state.columns.find(c=>c.key===col);
+    const rows=baseRows().filter(r=>typeof r[x]==='number'&&typeof r[y]==='number').map(r=>col?[r[x],r[y],r[col]]:[r[x],r[y]]);
+    return {headers:col?[nx,ny,cc.name]:[nx,ny],rows};
+  }
+  if(type==='box'){
+    const groups=new Map();
+    if(cx&&cx.type!=='number'){for(const r of baseRows()){const k=r[x];if(k==null||k==='')continue;const v=r[y];if(typeof v==='number'){const ks=String(k);if(!groups.has(ks))groups.set(ks,[]);groups.get(ks).push(v);}}}
+    else groups.set(ny,numericValues(y));
+    const rows=[...groups.entries()].filter(e=>e[1].length).map(([k,arr])=>{const s=arr.slice().sort((a,b)=>a-b);return [k,s[0],quantile(s,.25),quantile(s,.5),quantile(s,.75),s[s.length-1]];});
+    return {headers:['group','min','Q1','median','Q3','max'],rows};
+  }
+  if(type==='heat'){
+    const ycat=$('#chColor').value,cc=state.columns.find(c=>c.key===ycat);if(!ycat)return null;
+    const ct=crossTab(x,ycat,y,agg);
+    return {headers:[cc?cc.name:'',...ct.cats],rows:ct.series.map(s=>[s,...ct.cats.map(c=>ct.get(c,s))])};
+  }
+  if(type==='line'&&cx&&(cx.type==='number'||cx.type==='date')){
+    const rows=baseRows().map(r=>[r[x],r[y]]).filter(p=>p[0]!=null&&typeof p[1]==='number');
+    return {headers:[nx,ny],rows};
+  }
+  const data=groupAgg(x,y,agg,cx?cx.type:'string');
+  return {headers:[nx,agg+'('+ny+')'],rows:data};
+}
+function exportChartDataCSV(){
+  let d;try{d=currentChartData();}catch(e){d=null;}
+  if(!d||!d.rows.length){toast('—');return;}
+  download('dataweave_chartdata.csv',toCSV(d.headers,d.rows),'text/csv;charset=utf-8');
+}
+function dedupeRows(){
+  const seen=new Set(),keep=[];
+  for(const r of state.rows){const sig=state.columns.map(c=>String(r[c.key]??'')).join('\u0001');if(!seen.has(sig)){seen.add(sig);keep.push(r);}}
+  const removed=state.rows.length-keep.length;state.rows=keep;return removed;
+}
+function trimRows(){let n=0;for(const r of state.rows)for(const c of state.columns){if(c.type!=='number'&&typeof r[c.key]==='string'){const t=r[c.key].trim();if(t!==r[c.key]){r[c.key]=t;n++;}}}return n;}
+function resetView(){
+  state.sortCol=null; state.sortDir=1; state.search=''; state.filters=[];
+  state.columns.forEach(c=>{c.hidden=false;});
+  state.columns.sort((a,b)=>(a.ord??0)-(b.ord??0));
+  if($('#tblSearch'))$('#tblSearch').value='';
+  renderFilterChips(); buildColumnSelectors(); buildFilterControls(); refreshMeta();
+  if($('#colMgr')&&$('#colMgr').classList.contains('show'))renderColMgr();
+  rerenderActive();
+}
+function addComputedColumn(name,formula){
+  if(!name||!formula)return false;
+  let expr=formula.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-');
+  const ordered=state.columns.slice().sort((a,b)=>b.name.length-a.name.length);
+  for(const c of ordered){const safe=c.name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    try{expr=expr.replace(new RegExp('(?<![\\w])'+safe+'(?![\\w])','g'),' '+c.key+' ');}
+    catch(e){expr=expr.split(c.name).join(' '+c.key+' ');}}
+  const argKeys=state.columns.map(c=>c.key);
+  const helpers={sqrt:Math.sqrt,log:Math.log,ln:Math.log,abs:Math.abs,round:Math.round,min:Math.min,max:Math.max,pow:Math.pow,exp:Math.exp,floor:Math.floor,ceil:Math.ceil};
+  let fn;try{fn=new Function(...argKeys,...Object.keys(helpers),'return ('+expr+');');}catch(e){return false;}
+  const hv=Object.values(helpers),vals=[];
+  for(const r of state.rows){
+    const a=argKeys.map(k=>{const x=r[k];if(typeof x==='number')return x;if(x==null)return NaN;const n=parseMaybeNumber(String(x));return Number.isNaN(n)?NaN:n;});
+    let v;try{v=fn(...a,...hv);}catch(e){v=null;}
+    vals.push(typeof v==='number'&&isFinite(v)?v:null);
+  }
+  if(!vals.some(v=>typeof v==='number'))return false;
+  const key='cc'+state.columns.length+Date.now().toString(36).slice(-4);
+  state.columns.push({name,type:'number',key,formula,ord:state.columns.length});
+  state.rows.forEach((r,i)=>{r[key]=vals[i];});
+  return true;
+}
+/* ========================== SESSION ========================== */
+const CHART_CTRLS=['chType','chX','chY','chAgg','chColor','chBins','chTopN','chTrend','chFit','chCI','chPI','chConf','chNorm','chMeanMed','chMA','chMAWin','chHoriz','chLabels','chStack'];
+const PIVOT_CTRLS=['pvRow','pvCol','pvVal','pvAgg'];
+function ctrlVal(id){const el=$('#'+id);if(!el)return null;return el.type==='checkbox'?el.checked:el.value;}
+function setCtrl(id,v){const el=$('#'+id);if(!el||v==null)return;if(el.type==='checkbox')el.checked=!!v;else el.value=v;}
+function getSession(){
+  const chart={},pivot={};
+  CHART_CTRLS.forEach(id=>chart[id]=ctrlVal(id));
+  PIVOT_CTRLS.forEach(id=>pivot[id]=ctrlVal(id));
+  return {app:'DataWeave',v:6,fileName:state.fileName,
+    lang, theme:document.documentElement.getAttribute('data-theme')||'light',
+    activeTab:state.activeTab, search:state.search,
+    filters:state.filters.map(f=>({key:f.key,op:f.op,value:f.value})),
+    computed:state.columns.filter(c=>c.formula).map(c=>({name:c.name,formula:c.formula})),
+    layout:state.columns.map(c=>({name:c.name,hidden:!!c.hidden})),
+    chart, pivot};
+}
+function saveSession(){
+  download((state.fileName.replace(/\.[^.]+$/,'')||'data')+'_session.json',JSON.stringify(getSession(),null,2),'application/json;charset=utf-8');
+  toast(T().sessionSaved);
+}
+function applySession(s){
+  if(!s||s.app!=='DataWeave')throw new Error('bad');
+  (s.computed||[]).forEach(c=>{if(!state.columns.some(col=>col.name===c.name))addComputedColumn(c.name,c.formula);});
+  // restore column order + visibility
+  if(Array.isArray(s.layout)){
+    const order=s.layout.map(l=>l.name);
+    state.columns.sort((a,b)=>{const ia=order.indexOf(a.name),ib=order.indexOf(b.name);return (ia<0?999:ia)-(ib<0?999:ib);});
+    const hid={}; s.layout.forEach(l=>hid[l.name]=!!l.hidden);
+    state.columns.forEach(c=>{if(c.name in hid)c.hidden=hid[c.name];});
+  }
+  if(s.theme){document.documentElement.setAttribute('data-theme',s.theme);$('#themeBtn').textContent=s.theme==='dark'?'☀':'☾';}
+  const langChanged=s.lang&&s.lang!==lang; if(s.lang)lang=s.lang;
+  buildColumnSelectors();
+  if(s.chart)Object.keys(s.chart).forEach(id=>setCtrl(id,s.chart[id]));
+  if(s.pivot)Object.keys(s.pivot).forEach(id=>setCtrl(id,s.pivot[id]));
+  state.filters=(s.filters||[]).filter(f=>colByKey(f.key));
+  state.search=s.search||''; if($('#tblSearch'))$('#tblSearch').value=state.search;
+  if(langChanged)applyI18N();
+  renderFilterChips(); refreshMeta();
+  const tab=s.activeTab||'table';
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===tab));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+tab));
+  state.activeTab=tab; rerenderActive();
+}
+function currentSvg(holder){return $(holder).querySelector('svg');}
+function dlSvg(holder,name){
+  const svg=currentSvg(holder);if(!svg){toast('—');return;}
+  const clone=svg.cloneNode(true);
+  // inline computed colors so it renders standalone
+  const bg=getCol('--card');
+  clone.setAttribute('style','background:'+bg);
+  inlineVars(clone);
+  const str='<?xml version="1.0" encoding="UTF-8"?>\n'+new XMLSerializer().serializeToString(clone);
+  download(name+'.svg',str,'image/svg+xml');
+}
+function inlineVars(el){
+  const map={};['--c1','--c2','--c3','--c4','--c5','--c6','--c7','--c8','--accent','--accent-2','--line','--line-strong','--ink-soft','--card','--paper-2'].forEach(v=>map['var('+v+')']=getCol(v));
+  const walk=n=>{if(n.attributes)for(const a of n.attributes){if(a.value.includes('var('))for(const k in map)a.value=a.value.split(k).join(map[k]);}n.childNodes&&n.childNodes.forEach(walk);};
+  walk(el);
+}
+function dlPng(holder,name){
+  const svg=currentSvg(holder);if(!svg)return;
+  const clone=svg.cloneNode(true);inlineVars(clone);
+  const w=+svg.getAttribute('width')||860,h=+svg.getAttribute('height')||440,scale=2;
+  const str=new XMLSerializer().serializeToString(clone);
+  const img=new Image();
+  img.onload=()=>{
+    const cv=document.createElement('canvas');cv.width=w*scale;cv.height=h*scale;
+    const ctx=cv.getContext('2d');ctx.fillStyle=getCol('--card');ctx.fillRect(0,0,cv.width,cv.height);
+    ctx.scale(scale,scale);ctx.drawImage(img,0,0);
+    cv.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name+'.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast(T().dl+': '+name+'.png');});
+  };
+  img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(str);
+}
+
+/* ========================== SELECTORS / WIRING ========================== */
+function optsFor(filter){return state.columns.filter(c=>!c.hidden&&filter(c)).map(c=>`<option value="${c.key}">${esc(c.name)}</option>`).join('');}
+function buildColumnSelectors(){
+  const all=c=>true,num=c=>c.type==='number',cat=c=>c.type!=='number';
+  const numCols=state.columns.filter(num),catCols=state.columns.filter(cat);
+  const keep=sel=>{const v=$(sel).value;return v;};
+  const cx=keep('#chX'),cy=keep('#chY'),cc=keep('#chColor'),pr=keep('#pvRow'),pc=keep('#pvCol'),pv=keep('#pvVal');
+  // chart
+  $('#chX').innerHTML=optsFor(all);
+  $('#chY').innerHTML=optsFor(num)||optsFor(all);
+  $('#chColor').innerHTML=`<option value="">${T().none}</option>`+optsFor(all);
+  if(catCols.length)$('#chX').value=catCols[0].key; else if(state.columns[0])$('#chX').value=state.columns[0].key;
+  if(numCols.length)$('#chY').value=numCols[0].key;
+  // pivot
+  $('#pvRow').innerHTML=optsFor(all);
+  $('#pvCol').innerHTML=`<option value="">${T().none}</option>`+optsFor(cat);
+  $('#pvVal').innerHTML=optsFor(num)||optsFor(all);
+  if(catCols.length)$('#pvRow').value=catCols[0].key;
+  if(numCols.length)$('#pvVal').value=numCols[0].key;
+  // restore prior selections if still valid
+  const setIf=(sel,v)=>{if(v&&colByKey(v))$(sel).value=v;};
+  setIf('#chX',cx);setIf('#chY',cy);setIf('#chColor',cc);setIf('#pvRow',pr);setIf('#pvCol',pc);setIf('#pvVal',pv);
+  buildFilterControls();
+}
+function buildFilterControls(){
+  const sel=$('#flCol');
+  const prev=sel.value;
+  sel.innerHTML=optsFor(c=>true);
+  if(prev&&colByKey(prev))sel.value=prev;
+  buildFilterOps();
+}
+function buildFilterOps(){
+  const col=colByKey($('#flCol').value); if(!col)return;
+  const ops=col.type==='number'?OPS_NUM:OPS_TXT;
+  $('#flOp').innerHTML=ops.map(o=>`<option value="${o}">${T()[OP_LABEL(o)]}</option>`).join('');
+}
+function addFilter(){
+  const key=$('#flCol').value, op=$('#flOp').value, value=$('#flVal').value.trim();
+  if(!key||value==='')return;
+  state.filters.push({key,op,value});
+  $('#flVal').value='';
+  renderFilterChips(); refreshMeta(); rerenderActive();
+}
+function renderFilterChips(){
+  const box=$('#flChips');
+  if(!state.filters.length){box.innerHTML='';$('#flClear').style.display='none';return;}
+  $('#flClear').style.display='inline-block';
+  box.innerHTML=state.filters.map((f,i)=>{
+    const c=colByKey(f.key);
+    return `<span class="fchip"><b>${esc(c?c.name:f.key)}</b> ${T()[OP_LABEL(f.op)]} ${esc(f.value)} <span class="x" data-fi="${i}">×</span></span>`;
+  }).join('');
+  box.querySelectorAll('.x').forEach(x=>x.onclick=()=>{state.filters.splice(+x.dataset.fi,1);renderFilterChips();refreshMeta();rerenderActive();});
+}
+function refreshMeta(){
+  $('#fileName').textContent=state.fileName;
+  $('#rowCount').textContent=T().rows(state.rows.length);
+  $('#colCount').textContent=T().cols(state.columns.length);
+  const dl={',':'CSV (,)',';':'CSV (;)','\t':'TSV','|':'PIPE (|)','json':'JSON'}[state.delim]||state.delim;
+  $('#delimInfo').textContent=dl;
+  const ap=$('#activePill');
+  if(state.filters.length){ap.style.display='inline-block';ap.textContent=T().activeRows(baseRows().length,state.rows.length);}
+  else ap.style.display='none';
+}
+function rerenderActive(){
+  const t=state.activeTab;
+  if(t==='table')renderTable();
+  else if(t==='stats')renderStats();
+  else if(t==='chart')renderChart();
+  else if(t==='pivot')renderPivot();
+  else if(t==='corr')renderCorr();
+}
+function showApp(){
+  $('#intake').style.display='none';
+  $('#app').style.display='block';
+  $('#newBtn').style.display='inline-block';
+  refreshMeta();buildColumnSelectors();renderFilterChips();
+  state.activeTab='table';
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab==='table'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-table'));
+  renderTable();
+}
+function loadText(text,name){
+  try{ ingest(text,name); }catch(e){ toast(T().parseErr); return; }
+  if(!state.columns.length){toast(T().parseErr);return;}
+  showApp(); toast(T().loaded);
+}
+
+/* ========================== SAMPLES ========================== */
+const SAMPLES={
+  iris:`sepal_length,sepal_width,petal_length,petal_width,species
+5.1,3.5,1.4,0.2,setosa
+4.9,3.0,1.4,0.2,setosa
+4.7,3.2,1.3,0.2,setosa
+5.0,3.6,1.4,0.2,setosa
+5.4,3.9,1.7,0.4,setosa
+7.0,3.2,4.7,1.4,versicolor
+6.4,3.2,4.5,1.5,versicolor
+6.9,3.1,4.9,1.5,versicolor
+5.5,2.3,4.0,1.3,versicolor
+6.5,2.8,4.6,1.5,versicolor
+6.3,3.3,6.0,2.5,virginica
+5.8,2.7,5.1,1.9,virginica
+7.1,3.0,5.9,2.1,virginica
+6.3,2.9,5.6,1.8,virginica
+6.5,3.0,5.8,2.2,virginica
+7.6,3.0,6.6,2.1,virginica
+4.6,3.4,1.4,0.3,setosa
+5.7,2.8,4.5,1.3,versicolor
+6.7,3.1,4.7,1.5,versicolor
+6.2,3.4,5.4,2.3,virginica`,
+  cities:`oras,tara,populatie,suprafata_km2,fus_orar
+Bucuresti,Romania,1716961,228,EET
+Berlin,Germania,3677472,891,CET
+Madrid,Spania,3223334,604,CET
+Roma,Italia,2860009,1287,CET
+Paris,Franta,2102650,105,CET
+Viena,Austria,1920949,415,CET
+Varsovia,Polonia,1790658,517,CET
+Budapesta,Ungaria,1706851,525,CET
+Praga,Cehia,1357326,496,CET
+Sofia,Bulgaria,1280000,492,EET
+Atena,Grecia,664046,39,EET
+Lisabona,Portugalia,544851,100,WET`,
+  sales:`luna,regiune,produs,vanzari,profit
+2025-01,Nord,Software,42000,12600
+2025-01,Sud,Software,38500,11550
+2025-02,Nord,Software,45200,13560
+2025-02,Sud,Hardware,51000,10200
+2025-03,Nord,Hardware,48700,9740
+2025-03,Sud,Software,40300,12090
+2025-04,Nord,Software,52100,15630
+2025-04,Sud,Hardware,55400,11080
+2025-05,Nord,Hardware,49800,9960
+2025-05,Sud,Software,43900,13170
+2025-06,Nord,Software,57300,17190
+2025-06,Sud,Hardware,60200,12040`
+};
+
+/* ========================== EVENTS ========================== */
+function wire(){
+  const drop=$('#drop'),fi=$('#fileInput');
+  $('#fileBtn').onclick=()=>fi.click();
+  fi.onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>loadText(rd.result,f.name);rd.readAsText(f);};
+  ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag');}));
+  ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();if(ev==='dragleave'&&e.target!==drop)return;drop.classList.remove('drag');}));
+  drop.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>loadText(rd.result,f.name);rd.readAsText(f);});
+  $('#pasteBtn').onclick=()=>{const p=$('#pasteWrap');p.style.display=p.style.display==='block'?'none':'block';};
+  $('#pasteLoad').onclick=()=>{const v=$('#pasteArea').value.trim();if(v)loadText(v,'pasted.csv');};
+  document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>loadText(SAMPLES[c.dataset.sample],c.dataset.sample+'.csv'));
+  $('#newBtn').onclick=()=>{location.reload();};
+
+  // tabs
+  document.querySelectorAll('.tab').forEach(tab=>tab.onclick=()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));tab.classList.add('active');
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    $('#panel-'+tab.dataset.tab).classList.add('active');
+    state.activeTab=tab.dataset.tab;rerenderActive();
+  });
+
+  // table search (debounced)
+  let st;$('#tblSearch').addEventListener('input',e=>{clearTimeout(st);st=setTimeout(()=>{state.search=e.target.value;renderTable();},180);});
+
+  // chart controls
+  ['chType','chX','chY','chAgg','chColor','chBins','chTopN','chHoriz','chLabels','chStack','chTrend','chFit','chCI','chPI','chConf','chNorm','chMeanMed','chMA','chMAWin'].forEach(id=>$('#'+id).addEventListener('input',renderChart));
+  ['pvRow','pvCol','pvVal','pvAgg'].forEach(id=>$('#'+id).addEventListener('input',renderPivot));
+  $('#corrMethodSel').addEventListener('change',renderCorr);
+
+  // data tools
+  $('#btnDedupe').onclick=()=>{const n=dedupeRows();refreshMeta();buildColumnSelectors();rerenderActive();toast(T().removed(n));};
+  $('#btnColumns').onclick=()=>{const cm=$('#colMgr');cm.classList.toggle('show');if(cm.classList.contains('show'))renderColMgr();};
+  $('#btnReset').onclick=resetView;
+  $('#btnTrim').onclick=()=>{trimRows();rerenderActive();toast(T().trimmed);};
+  $('#btnAddCol').onclick=()=>{$('#colForm').classList.toggle('show');};
+  $('#cfCancel').onclick=()=>{$('#colForm').classList.remove('show');$('#cfName').value='';$('#cfFormula').value='';};
+  $('#cfCreate').onclick=()=>{
+    const name=$('#cfName').value.trim(),formula=$('#cfFormula').value.trim();
+    if(addComputedColumn(name,formula)){$('#colForm').classList.remove('show');$('#cfName').value='';$('#cfFormula').value='';buildColumnSelectors();rerenderActive();toast(T().colAdded+': '+name);}
+    else toast(T().badFormula);
+  };
+  $('#binsAuto').onclick=()=>{
+    const vals=numericValues($('#chX').value);if(vals.length<4)return;
+    const s=vals.slice().sort((a,b)=>a-b);const iqr=quantile(s,.75)-quantile(s,.25);
+    const h=2*iqr*Math.pow(vals.length,-1/3);
+    let b=h>0?Math.ceil((s[s.length-1]-s[0])/h):Math.ceil(Math.sqrt(vals.length));
+    b=Math.max(2,Math.min(60,b||12));$('#chBins').value=b;renderChart();
+  };
+
+  // filters
+  $('#flCol').addEventListener('change',buildFilterOps);
+  $('#flAdd').onclick=addFilter;
+  $('#flVal').addEventListener('keydown',e=>{if(e.key==='Enter')addFilter();});
+  $('#flClear').onclick=()=>{state.filters=[];renderFilterChips();refreshMeta();rerenderActive();};
+
+  // export
+  $('#exportClean').onclick=exportCleanCSV;
+  $('#exportJson').onclick=exportJSON;
+  $('#exportStats').onclick=exportStatsCSV;
+  $('#dlChartData').onclick=exportChartDataCSV;
+  $('#saveSession').onclick=saveSession;
+  $('#loadSession').onclick=()=>$('#sessionInput').click();
+  $('#sessionInput').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{applySession(JSON.parse(rd.result));toast(T().sessionLoaded);}catch(err){toast(T().sessionErr);}e.target.value='';};rd.readAsText(f);};
+  $('#dlSvg').onclick=()=>dlSvg('#chartHolder','dataweave_chart');
+  $('#dlPng').onclick=()=>dlPng('#chartHolder','dataweave_chart');
+  $('#dlCorrSvg').onclick=()=>dlSvg('#corrHolder','dataweave_corelatii');
+  $('#dlCorrPng').onclick=()=>dlPng('#corrHolder','dataweave_corelatii');
+  $('#dlPivot').onclick=()=>{
+    const t=$('#pivotOut table');if(!t){toast('—');return;}
+    const headers=[...t.querySelectorAll('thead th')].map(th=>th.textContent);
+    const rows=[...t.querySelectorAll('tbody tr')].map(tr=>[...tr.children].map(td=>td.textContent));
+    download('dataweave_pivot.csv',toCSV(headers,rows),'text/csv;charset=utf-8');
+  };
+
+  // lang & theme
+  $('#langSel').onchange=e=>{lang=e.target.value;applyI18N();};
+  $('#themeBtn').onclick=()=>{
+    const cur=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+    document.documentElement.setAttribute('data-theme',cur);
+    $('#themeBtn').textContent=cur==='dark'?'☀':'☾';
+    if(state.columns.length&&['chart','corr'].includes(state.activeTab))rerenderActive();
+  };
+
+  // Esc closes open inline forms
+  // about modal
+  const am=$('#aboutModal');
+  $('#aboutBtn').onclick=()=>am.classList.add('show');
+  $('#aboutClose').onclick=()=>am.classList.remove('show');
+  am.addEventListener('click',e=>{if(e.target===am)am.classList.remove('show');});
+
+  // Esc closes open inline forms and modal
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){const cf=$('#colForm');if(cf)cf.classList.remove('show');const pw=$('#pasteWrap');if(pw)pw.style.display='none';if(am)am.classList.remove('show');const cm=$('#colMgr');if(cm)cm.classList.remove('show');}});
+}
+function initTheme(){
+  try{ if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches){
+    document.documentElement.setAttribute('data-theme','dark');
+    const tb=document.getElementById('themeBtn'); if(tb)tb.textContent='☀';
+  }}catch(e){}
+}
+
+document.addEventListener('DOMContentLoaded',()=>{initTheme();wire();applyI18N();});
+</script>
+</body>
+</html>
