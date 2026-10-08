@@ -18,13 +18,13 @@
 -->
 <html lang="ro">
 <head>
+<meta charset="UTF-8">
 <style id="tf-a11y-motion">
 /* Accesibilitate: respectă preferința utilizatorului pentru mai puțină mișcare (TROM/a11y). */
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
 }
 </style>
-<meta charset="UTF-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; media-src 'self' blob: data:; object-src 'none'; base-uri 'self'; form-action 'self'; worker-src 'self' blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; connect-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DataWeave — atelier de date offline</title>
@@ -918,7 +918,7 @@ const fmtNum = x => {
   let d = abs>=1000?0 : abs>=1?2 : abs>=0.01?4 : 6;
   return x.toLocaleString(loc(),{maximumFractionDigits:d});
 };
-const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1800);}
 
 /* ========================== PARSING ========================== */
@@ -968,7 +968,7 @@ function parseMaybeNumber(s){
   else if(/^-?\d+,\d+$/.test(v)) v=v.replace(',','.');                                      // 12,5
   if(/^-?\d*\.?\d+([eE][+-]?\d+)?%?$/.test(v)){
     const pct=v.endsWith('%'); const num=parseFloat(pct?v.slice(0,-1):v);
-    if(!Number.isNaN(num)) return pct?num/100:num;
+    if(Number.isFinite(num)) return pct?num/100:num;
   }
   return NaN;
 }
@@ -1004,7 +1004,7 @@ function ingest(rawText, fileName){
     let arr=Array.isArray(json)?json:(Array.isArray(json.data)?json.data:Object.values(json).find(Array.isArray));
     if(!Array.isArray(arr)) throw new Error('json-shape');
     const keys=[...new Set(arr.flatMap(o=>o&&typeof o==='object'?Object.keys(o):[]))];
-    headers=keys; rows=arr.map(o=>keys.map(k=>o?(o[k]??''):''));
+    headers=keys; rows=arr.map(o=>keys.map(k=>{const x=o?(o[k]??''):'';return x&&typeof x==='object'?JSON.stringify(x):x;}));
     state.delim='json';
   } else {
     const d=detectDelimiter(rawText); state.delim=d;
@@ -1831,11 +1831,11 @@ function renderCorr(){
 
 /* ========================== EXPORT ========================== */
 function toCSV(headers,rows){
-  const q=v=>{if(v==null)return'';const s=String(v);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
+  const q=v=>{if(v==null)return'';let s=String(v);if(typeof v==='string'&&/^[=+\-@\t\r]/.test(s))s="'"+s;return /[",\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
   return headers.map(q).join(',')+'\n'+rows.map(r=>r.map(q).join(',')).join('\n');
 }
 function download(name,content,mime){
-  const blob=new Blob([content],{type:mime||'text/plain;charset=utf-8'});
+  const blob=new Blob([/^text\/csv/.test(mime||'')?['\uFEFF',content]:[content]],{type:mime||'text/plain;charset=utf-8'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast(T().dl+': '+name);
 }
@@ -1924,6 +1924,11 @@ function addComputedColumn(name,formula){
     catch(e){expr=expr.split(c.name).join(' '+c.key+' ');}}
   const argKeys=state.columns.map(c=>c.key);
   const helpers={sqrt:Math.sqrt,log:Math.log,ln:Math.log,abs:Math.abs,round:Math.round,min:Math.min,max:Math.max,pow:Math.pow,exp:Math.exp,floor:Math.floor,ceil:Math.ceil};
+  // allow-list: only arithmetic, column keys and helper names (blocks code injection via typed/imported formulas)
+  if(!/^[\w\s+\-*\/%.,()<>=!&|?:^~]*$/.test(expr))return false;
+  {const okId=new Set([...argKeys,...Object.keys(helpers),'Infinity','NaN']);
+   const ids=expr.replace(/(?<![\w$])(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?/g,' ').match(/[A-Za-z_$][\w$]*/g)||[];
+   if(ids.some(i=>!okId.has(i)))return false;}
   let fn;try{fn=new Function(...argKeys,...Object.keys(helpers),'return ('+expr+');');}catch(e){return false;}
   const hv=Object.values(helpers),vals=[];
   for(const r of state.rows){
@@ -1968,7 +1973,8 @@ function applySession(s){
     const hid={}; s.layout.forEach(l=>hid[l.name]=!!l.hidden);
     state.columns.forEach(c=>{if(c.name in hid)c.hidden=hid[c.name];});
   }
-  if(s.theme){document.documentElement.setAttribute('data-theme',s.theme);$('#themeBtn').textContent=s.theme==='dark'?'☀':'☾';}
+  if(s.theme==='light'||s.theme==='dark'){document.documentElement.setAttribute('data-theme',s.theme);$('#themeBtn').textContent=s.theme==='dark'?'☀':'☾';}
+  if(s.lang&&!I18N[s.lang])s.lang=null;
   const langChanged=s.lang&&s.lang!==lang; if(s.lang)lang=s.lang;
   buildColumnSelectors();
   if(s.chart)Object.keys(s.chart).forEach(id=>setCtrl(id,s.chart[id]));
