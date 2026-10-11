@@ -66,7 +66,7 @@
     padding:26px 0 18px;border-bottom:2px solid var(--ink);flex-wrap:wrap;
   }
   .brand{display:flex;align-items:baseline;gap:14px}
-  .logo{font-family:var(--serif);font-size:40px;font-weight:700;letter-spacing:-.02em;line-height:.9}
+  .logo{margin:0;font-family:var(--serif);font-size:40px;font-weight:700;letter-spacing:-.02em;line-height:.9}
   .logo .w{color:var(--accent)}
   .tag{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);max-width:380px}
   .ctrls{display:flex;gap:8px;align-items:center}
@@ -293,11 +293,11 @@
 <div class="wrap">
   <header class="top">
     <div class="brand">
-      <div class="logo">Data<span class="w">Weave</span></div>
+      <h1 class="logo">Data<span class="w">Weave</span></h1>
       <div class="tag" data-i18n="tagline">vizualizare de date · 100% în browser · zero telemetrie</div>
     </div>
     <div class="ctrls">
-      <select class="btn ghost" id="langSel" title="Language" style="padding-right:8px">
+      <select class="btn ghost" id="langSel" title="Language" aria-label="Language" style="padding-right:8px">
         <option value="en">English</option>
         <option value="ro">Română</option>
         <option value="fr">Français</option>
@@ -306,12 +306,13 @@
         <option value="pt">Português</option>
         <option value="de">Deutsch</option>
       </select>
-      <button class="btn ghost" id="themeBtn">☾</button>
+      <button class="btn ghost" id="themeBtn" aria-label="Theme" title="Theme">☾</button>
       <button class="btn ghost" id="aboutBtn" data-i18n="about" title="About">Despre</button>
       <button class="btn" id="newBtn" data-i18n="newData" style="display:none">Date noi</button>
     </div>
   </header>
 
+  <main id="main">
   <!-- INTAKE -->
   <section id="intake">
     <div class="drop" id="drop">
@@ -504,19 +505,21 @@
         <p class="hint" data-i18n="corrNote" style="align-self:center;flex:1;min-width:200px">Matricea de corelație Pearson între coloanele numerice.</p>
       </div>
       <div class="chart-area"><div id="corrHolder"></div></div>
+      <p class="hint" id="corrLegend" style="margin-top:10px"></p>
       <div class="export-row">
         <button class="btn sm" id="dlCorrSvg">⬇ SVG</button>
         <button class="btn sm" id="dlCorrPng">⬇ PNG</button>
       </div>
     </div>
   </section>
+  </main>
 
   <footer>
-    <span class="mono">DataWeave · single-file · <span id="ver">v7.1</span></span>
+    <span class="mono">DataWeave · single-file · <span id="ver">v7.1.1</span></span>
     <span data-i18n="footRight">Construit pentru jurnaliști, cercetători și profesori. Datele rămân la tine.</span>
   </footer>
 </div>
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="modal-bg" id="aboutModal">
   <div class="modal">
     <button class="modal-x" id="aboutClose" aria-label="close">×</button>
@@ -1798,7 +1801,7 @@ function corrPair(a,b,method){
 }
 function renderCorr(){
   const nums=visibleColumns().filter(c=>c.type==='number');
-  if(nums.length<2){$('#corrHolder').innerHTML=`<div class="empty-note">${T().needTwoNum}</div>`;return;}
+  if(nums.length<2){$('#corrHolder').innerHTML=`<div class="empty-note">${T().needTwoNum}</div>`;const lg0=$('#corrLegend');if(lg0)lg0.textContent='';return;}
   const method=($('#corrMethodSel')&&$('#corrMethodSel').value)||'pearson';
   const cols=nums.slice(0,14);
   const m=cols.map(ci=>cols.map(cj=>{
@@ -1828,6 +1831,9 @@ function renderCorr(){
     }
   }
   $('#corrHolder').innerHTML=svgWrap(`${labels}${cells}`,W,H);
+  const LG={en:['Warm = positive, cool = negative. Strongest pair:','Hover a cell for the exact value.'],ro:['Cald = pozitivă, rece = negativă. Cea mai puternică pereche:','Treceți cursorul peste o celulă pentru valoarea exactă.'],fr:['Chaud = positive, froid = négative. Paire la plus forte :','Survolez une cellule pour la valeur exacte.'],it:['Caldo = positiva, freddo = negativa. Coppia più forte:','Passa sopra una cella per il valore esatto.'],es:['Cálido = positiva, frío = negativa. Pareja más fuerte:','Pase el cursor sobre una celda para el valor exacto.'],pt:['Quente = positiva, frio = negativa. Par mais forte:','Passe o cursor sobre uma célula para o valor exato.'],de:['Warm = positiv, kühl = negativ. Stärkstes Paar:','Zelle überfahren für den genauen Wert.']};
+  let best=null;for(let i=0;i<k;i++)for(let j=i+1;j<k;j++){const v=m[i][j];if(v!=null&&(best==null||Math.abs(v)>Math.abs(best.v)))best={v,a:cols[i].name,b:cols[j].name};}
+  const lg=$('#corrLegend');if(lg){const t=LG[lang]||LG.en;lg.textContent=t[0]+(best?' '+best.a+' ↔ '+best.b+' (r = '+best.v.toFixed(2)+'). ':' ')+t[1];}
 }
 
 /* ========================== EXPORT ========================== */

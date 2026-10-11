@@ -4,6 +4,8 @@ Atelier de vizualizare și analiză a datelor tabelare, direct în browser.
 
 **Live:** https://chiuta.github.io/DataWeave/
 
+Ultima actualizare: 11 octombrie 2026 · versiune 7.1.1
+
 ![Captura de ecran](screenshot.png)
 
 ## Ce este
@@ -43,6 +45,13 @@ DataWeave este o aplicație HTML dintr-un singur fișier pentru explorarea fiși
 ## Rulare locală / offline
 
 Descarcă `index.html` și deschide-l în browser; nu are nevoie de internet.
+
+## Istoric / Changelog
+
+### 7.1.1 — 11 octombrie 2026
+- Accesibilitate: titlu h1, zonă principală (main), etichete pentru selectorul de limbă și butonul de temă, regiune de stare pentru notificări; verificare axe fără încălcări.
+- Fila Corelații: legendă explicativă și cea mai puternică pereche de coloane, în toate cele 7 limbi.
+- Actualizare versiune la v7.1.1.
 
 ## Licență
 
