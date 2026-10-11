@@ -4,7 +4,7 @@ Atelier de vizualizare și analiză a datelor tabelare, direct în browser.
 
 **Live:** https://chiuta.github.io/DataWeave/
 
-Ultima actualizare: 11 octombrie 2026 · versiune 7.1.2
+Ultima actualizare: 11 octombrie 2026 · versiune 7.1.3
 
 ![Captura de ecran](screenshot.png)
 
@@ -14,8 +14,8 @@ DataWeave este o aplicație HTML dintr-un singur fișier pentru explorarea fiși
 
 ## Funcții
 
-- Încărcare prin tragere de fișier, „Alege fișier" sau „Lipește date" (CSV, TSV, JSON); trei seturi demonstrative: Iris (flori), Orașe Europa, Vânzări lunare.
-- Filele Tabel (sortare prin click pe antet), Statistici, Grafice, Pivot, Corelații.
+- Încărcare prin tragere de fișier, „Alege fișier" sau „Lipește date" (CSV, TSV, JSON); trei seturi demonstrative: Iris (flori, cele 150 de rânduri clasice), Orașe Europa, Vânzări lunare.
+- Filele Tabel (sortare prin click oriunde pe celula antetului sau Enter/Spațiu pe nume), Statistici, Grafice, Pivot, Corelații.
 - Filtre multiple („+ Adaugă", „Șterge tot").
 - Unelte de date: elimină duplicate, curăță spații, coloană calculată, reordonare și ascundere coloane.
 - Grafice: bare, linie, scatter, histogramă, box-plot, heatmap, plăcintă; agregări (sumă, medie, mediană, număr, min, max, deviație standard), culoare după coloană, Top-N, orizontal, etichete de valori, stivuit.
@@ -48,6 +48,13 @@ DataWeave este o aplicație HTML dintr-un singur fișier pentru explorarea fiși
 Descarcă `index.html` și deschide-l în browser; nu are nevoie de internet.
 
 ## Istoric / Changelog
+
+### 7.1.3 — 11 octombrie 2026
+- Setul demonstrativ Iris conține acum cele 150 de rânduri clasice (înainte 20).
+- Sortarea se declanșează de la click oriunde pe celula antetului (nu doar pe nume), are `aria-sort` și funcționează de la tastatură; selectorul de tip nu sortează.
+- Corecție la asimetrie (skewness): formula ajustată folosește acum abaterea standard a populației în standardizare (verificată față de scipy `skew(bias=False)`).
+- Abaterea standard este etichetată „(n−1)” (eșantion) în toate cele 7 limbi.
+- CSP: `connect-src 'none'` (aplicația nu face nicio cerere de rețea).
 
 ### 7.1.2 — 11 octombrie 2026
 - Securitate: coloana calculată folosește un evaluator propriu de expresii (fără `eval`/`new Function`); politica CSP nu mai conține `'unsafe-eval'` și `'unsafe-inline'` pentru scripturi (script-src pe hash SHA-256), iar `worker-src` este `'none'`. Comportamentul formulelor existente este identic (verificat pe 25 de expresii).
