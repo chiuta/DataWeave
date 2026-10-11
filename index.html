@@ -25,7 +25,7 @@
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
 }
 </style>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; media-src 'self' blob: data:; object-src 'none'; base-uri 'self'; form-action 'self'; worker-src 'self' blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; connect-src 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; media-src 'self' blob: data:; object-src 'none'; base-uri 'self'; form-action 'self'; worker-src 'none'; script-src 'self' 'sha256-KkZ+YlujW8ol1ZxE/gW4V5sbMjjFonf/WnckUetO0Ps='; connect-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DataWeave — atelier de date offline</title>
 <meta name="description" content="Drag a CSV or JSON into the page and get instant interactive charts, pivot tables and descriptive statistics. No server, no account, no telemetry. One HTML file.">
@@ -287,6 +287,11 @@
     #langSel{max-width:120px}
   }
   @media(hover:none){.btn,.tab,.cm-mv,.chip{min-height:38px}}
+  @media print{
+    header.top .ctrls,.tabs,.datatools,.filterbar,.table-tools .hint,.export-row,.toast,.btn,.drop,footer{display:none!important}
+    body{background:#fff;color:#000}.panel{display:none!important}.panel.active{display:block!important}
+    .chart-area,.controls{break-inside:avoid;box-shadow:none}th,td{font-size:11px}
+  }
 </style>
 </head>
 <body>
@@ -515,7 +520,7 @@
   </main>
 
   <footer>
-    <span class="mono">DataWeave · single-file · <span id="ver">v7.1.1</span></span>
+    <span class="mono">DataWeave · single-file · <span id="ver">v7.1.2</span></span>
     <span data-i18n="footRight">Construit pentru jurnaliști, cercetători și profesori. Datele rămân la tine.</span>
   </footer>
 </div>
@@ -586,7 +591,7 @@ const I18N = {
     colName:"Nume coloană", colFormula:"Formulă (folosește numele coloanelor)", create:"Creează", cancel:"Renunță",
     badFormula:"Formulă invalidă sau fără rezultate numerice.", colAdded:"Coloană adăugată", removed:n=>n+" rânduri eliminate",
     trimmed:"Spații curățate", exportJson:"Export JSON", exportStats:"Export statistici", exportChartData:"Date grafic CSV",
-    formulaHint:"Operatori: + − × ÷ ( ) și funcții: sqrt, log, abs, round, min, max, pow.",
+    formulaHint:"Operatori: + − × ÷ ( ) și funcții: sqrt, log, abs, round, min, max, pow, floor, ceil, exp, log10, sin, cos, pi; ternar a>b?x:y.",
     ciBand:"Interval de încredere", groupByHist:"Grupează după",
     saveSession:"Salvează sesiune", loadSession:"Încarcă sesiune",
     sessionSaved:"Sesiune salvată", sessionLoaded:"Sesiune restaurată", sessionErr:"Sesiune invalidă pentru aceste date",
@@ -635,7 +640,7 @@ const I18N = {
     colName:"Column name", colFormula:"Formula (use column names)", create:"Create", cancel:"Cancel",
     badFormula:"Invalid formula or no numeric results.", colAdded:"Column added", removed:n=>n+" rows removed",
     trimmed:"Whitespace trimmed", exportJson:"Export JSON", exportStats:"Export statistics", exportChartData:"Chart data CSV",
-    formulaHint:"Operators: + − × ÷ ( ) and functions: sqrt, log, abs, round, min, max, pow.",
+    formulaHint:"Operators: + − × ÷ ( ) and functions: sqrt, log, abs, round, min, max, pow, floor, ceil, exp, log10, sin, cos, pi; ternary a>b?x:y.",
     ciBand:"Confidence interval", groupByHist:"Group by",
     saveSession:"Save session", loadSession:"Load session",
     sessionSaved:"Session saved", sessionLoaded:"Session restored", sessionErr:"Session invalid for this dataset",
@@ -683,7 +688,7 @@ const I18N = {
     colName:"Nom de colonne", colFormula:"Formule (utilisez les noms de colonnes)", create:"Créer", cancel:"Annuler",
     badFormula:"Formule invalide ou sans résultat numérique.", colAdded:"Colonne ajoutée", removed:n=>n+" lignes supprimées",
     trimmed:"Espaces nettoyés", exportJson:"Exporter JSON", exportStats:"Exporter statistiques", exportChartData:"Données du graphique CSV",
-    formulaHint:"Opérateurs : + − × ÷ ( ) et fonctions : sqrt, log, abs, round, min, max, pow.",
+    formulaHint:"Opérateurs : + − × ÷ ( ) et fonctions : sqrt, log, abs, round, min, max, pow, floor, ceil, exp, log10, sin, cos, pi; ternaire a>b?x:y.",
     ciBand:"Intervalle de confiance", groupByHist:"Grouper par",
     saveSession:"Enregistrer session", loadSession:"Charger session",
     sessionSaved:"Session enregistrée", sessionLoaded:"Session restaurée", sessionErr:"Session invalide pour ces données",
@@ -731,7 +736,7 @@ const I18N = {
     colName:"Nome colonna", colFormula:"Formula (usa i nomi delle colonne)", create:"Crea", cancel:"Annulla",
     badFormula:"Formula non valida o senza risultati numerici.", colAdded:"Colonna aggiunta", removed:n=>n+" righe rimosse",
     trimmed:"Spazi puliti", exportJson:"Esporta JSON", exportStats:"Esporta statistiche", exportChartData:"Dati grafico CSV",
-    formulaHint:"Operatori: + − × ÷ ( ) e funzioni: sqrt, log, abs, round, min, max, pow.",
+    formulaHint:"Operatori: + − × ÷ ( ) e funzioni: sqrt, log, abs, round, min, max, pow, floor, ceil, exp, log10, sin, cos, pi; ternario a>b?x:y.",
     ciBand:"Intervallo di confidenza", groupByHist:"Raggruppa per",
     saveSession:"Salva sessione", loadSession:"Carica sessione",
     sessionSaved:"Sessione salvata", sessionLoaded:"Sessione ripristinata", sessionErr:"Sessione non valida per questi dati",
@@ -779,7 +784,7 @@ const I18N = {
     colName:"Nombre de columna", colFormula:"Fórmula (usa los nombres de columnas)", create:"Crear", cancel:"Cancelar",
     badFormula:"Fórmula no válida o sin resultados numéricos.", colAdded:"Columna añadida", removed:n=>n+" filas eliminadas",
     trimmed:"Espacios limpiados", exportJson:"Exportar JSON", exportStats:"Exportar estadísticas", exportChartData:"Datos del gráfico CSV",
-    formulaHint:"Operadores: + − × ÷ ( ) y funciones: sqrt, log, abs, round, min, max, pow.",
+    formulaHint:"Operadores: + − × ÷ ( ) y funciones: sqrt, log, abs, round, min, max, pow, floor, ceil, exp, log10, sin, cos, pi; ternario a>b?x:y.",
     ciBand:"Intervalo de confianza", groupByHist:"Agrupar por",
     saveSession:"Guardar sesión", loadSession:"Cargar sesión",
     sessionSaved:"Sesión guardada", sessionLoaded:"Sesión restaurada", sessionErr:"Sesión no válida para estos datos",
@@ -826,7 +831,7 @@ const I18N = {
     colName:"Nome da coluna", colFormula:"Fórmula (use os nomes das colunas)", create:"Criar", cancel:"Cancelar",
     badFormula:"Fórmula inválida ou sem resultados numéricos.", colAdded:"Coluna adicionada", removed:n=>n+" linhas removidas",
     trimmed:"Espaços limpos", exportJson:"Exportar JSON", exportStats:"Exportar estatísticas", exportChartData:"Dados do gráfico CSV",
-    formulaHint:"Operadores: + − × ÷ ( ) e funções: sqrt, log, abs, round, min, max, pow.",
+    formulaHint:"Operadores: + − × ÷ ( ) e funções: sqrt, log, abs, round, min, max, pow, floor, ceil, exp, log10, sin, cos, pi; ternário a>b?x:y.",
     ciBand:"Intervalo de confiança", groupByHist:"Agrupar por",
     saveSession:"Guardar sessão", loadSession:"Carregar sessão",
     sessionSaved:"Sessão guardada", sessionLoaded:"Sessão restaurada", sessionErr:"Sessão inválida para estes dados",
@@ -874,7 +879,7 @@ const I18N = {
     colName:"Spaltenname", colFormula:"Formel (Spaltennamen verwenden)", create:"Erstellen", cancel:"Abbrechen",
     badFormula:"Ungültige Formel oder ohne numerische Ergebnisse.", colAdded:"Spalte hinzugefügt", removed:n=>n+" Zeilen entfernt",
     trimmed:"Leerzeichen bereinigt", exportJson:"JSON exportieren", exportStats:"Statistik exportieren", exportChartData:"Diagrammdaten CSV",
-    formulaHint:"Operatoren: + − × ÷ ( ) und Funktionen: sqrt, log, abs, round, min, max, pow.",
+    formulaHint:"Operatoren: + − × ÷ ( ) und Funktionen: sqrt, log, abs, round, min, max, pow, floor, ceil, exp, log10, sin, cos, pi; ternär a>b?x:y.",
     ciBand:"Konfidenzintervall", groupByHist:"Gruppieren nach",
     saveSession:"Sitzung speichern", loadSession:"Sitzung laden",
     sessionSaved:"Sitzung gespeichert", sessionLoaded:"Sitzung wiederhergestellt", sessionErr:"Sitzung für diese Daten ungültig",
@@ -1922,6 +1927,46 @@ function resetView(){
   if($('#colMgr')&&$('#colMgr').classList.contains('show'))renderColMgr();
   rerenderActive();
 }
+/* Evaluator de formule fără eval/new Function: parser recursiv cu aceeași precedență ca JavaScript. */
+function compileFormula(src,argKeys,helpers){
+  const toks=[];let i=0;
+  const re=/\s*(?:(\d+\.?\d*(?:[eE][+-]?\d+)?|\.\d+(?:[eE][+-]?\d+)?)|([A-Za-z_$][\w$]*)|(\*\*|===|!==|==|!=|<=|>=|<<|>>|&&|\|\||[-+*\/%^&|~!<>?:(),]))/y;
+  while(i<src.length){re.lastIndex=i;const m=re.exec(src);if(!m){if(/^\s*$/.test(src.slice(i)))break;throw new Error('tok');}
+    i=re.lastIndex;if(m[1]!==undefined)toks.push({t:'n',v:parseFloat(m[1])});else if(m[2]!==undefined)toks.push({t:'i',v:m[2]});else toks.push({t:'o',v:m[3]});}
+  let k=0;const peek=()=>toks[k],isOp=v=>toks[k]&&toks[k].t==='o'&&toks[k].v===v;
+  const eat=v=>{if(!isOp(v))throw new Error('exp '+v);k++;};
+  const idx=new Map(argKeys.map((a,j)=>[a,j]));
+  const i32=x=>x|0;
+  const bin={'*':(a,b)=>a*b,'/':(a,b)=>a/b,'%':(a,b)=>a%b,'+':(a,b)=>a+b,'-':(a,b)=>a-b,'<<':(a,b)=>i32(a)<<(b&31),'>>':(a,b)=>i32(a)>>(b&31),
+    '<':(a,b)=>a<b,'>':(a,b)=>a>b,'<=':(a,b)=>a<=b,'>=':(a,b)=>a>=b,'==':(a,b)=>a==b,'!=':(a,b)=>a!=b,'===':(a,b)=>a===b,'!==':(a,b)=>a!==b,
+    '&':(a,b)=>i32(a)&i32(b),'^':(a,b)=>i32(a)^i32(b),'|':(a,b)=>i32(a)|i32(b)};
+  const levels=[['||'],['&&'],['|'],['^'],['&'],['==','!=','===','!=='],['<','>','<=','>='],['<<','>>'],['+','-'],['*','/','%']];
+  function ternary(){const c=level(0);if(isOp('?')){k++;const a=ternary();eat(':');const b=ternary();return v=>c(v)?a(v):b(v);}return c;}
+  function level(n){
+    if(n>=levels.length)return unary();
+    let l=level(n+1);
+    while(peek()&&peek().t==='o'&&levels[n].includes(peek().v)){const op=peek().v;k++;const r=level(n+1);const a=l;
+      if(op==='||')l=v=>a(v)||r(v);else if(op==='&&')l=v=>a(v)&&r(v);else{const f=bin[op];l=v=>f(a(v),r(v));}}
+    return l;}
+  function unary(){
+    if(peek()&&peek().t==='o'){const op=peek().v;
+      if(op==='-'){k++;const a=unary();return v=>-a(v);}if(op==='+'){k++;const a=unary();return v=>+a(v);}
+      if(op==='!'){k++;const a=unary();return v=>!a(v);}if(op==='~'){k++;const a=unary();return v=>~a(v);}}
+    return power();}
+  function power(){const b=primary();if(isOp('**')){k++;const e=unary();return v=>Math.pow(b(v),e(v));}return b;}
+  function primary(){
+    const t=toks[k++];if(!t)throw new Error('eof');
+    if(t.t==='n'){const x=t.v;return()=>x;}
+    if(t.t==='o'&&t.v==='('){const e=ternary();eat(')');return e;}
+    if(t.t==='i'){
+      if(isOp('(')){const f=helpers[t.v];if(typeof f!=='function')throw new Error('fn');k++;const args=[];
+        if(!isOp(')')){do{args.push(ternary());if(isOp(','))k++;else break;}while(true);}eat(')');return v=>f(...args.map(a=>a(v)));}
+      if(idx.has(t.v)){const j=idx.get(t.v);return v=>v[j];}
+      if(t.v==='pi')return()=>Math.PI;if(t.v==='Infinity')return()=>Infinity;if(t.v==='NaN')return()=>NaN;throw new Error('id');}
+    throw new Error('tok');}
+  const root=ternary();if(k<toks.length)throw new Error('trail');
+  return root;
+}
 function addComputedColumn(name,formula){
   if(!name||!formula)return false;
   let expr=formula.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-');
@@ -1930,17 +1975,17 @@ function addComputedColumn(name,formula){
     try{expr=expr.replace(new RegExp('(?<![\\w])'+safe+'(?![\\w])','g'),' '+c.key+' ');}
     catch(e){expr=expr.split(c.name).join(' '+c.key+' ');}}
   const argKeys=state.columns.map(c=>c.key);
-  const helpers={sqrt:Math.sqrt,log:Math.log,ln:Math.log,abs:Math.abs,round:Math.round,min:Math.min,max:Math.max,pow:Math.pow,exp:Math.exp,floor:Math.floor,ceil:Math.ceil};
+  const helpers={sqrt:Math.sqrt,log:Math.log,ln:Math.log,abs:Math.abs,round:Math.round,min:Math.min,max:Math.max,pow:Math.pow,exp:Math.exp,floor:Math.floor,ceil:Math.ceil,log10:Math.log10,sin:Math.sin,cos:Math.cos};
   // allow-list: only arithmetic, column keys and helper names (blocks code injection via typed/imported formulas)
   if(!/^[\w\s+\-*\/%.,()<>=!&|?:^~]*$/.test(expr))return false;
-  {const okId=new Set([...argKeys,...Object.keys(helpers),'Infinity','NaN']);
+  {const okId=new Set([...argKeys,...Object.keys(helpers),'Infinity','NaN','pi']);
    const ids=expr.replace(/(?<![\w$])(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?/g,' ').match(/[A-Za-z_$][\w$]*/g)||[];
    if(ids.some(i=>!okId.has(i)))return false;}
-  let fn;try{fn=new Function(...argKeys,...Object.keys(helpers),'return ('+expr+');');}catch(e){return false;}
-  const hv=Object.values(helpers),vals=[];
+  let fn;try{fn=compileFormula(expr,argKeys,helpers);}catch(e){return false;}
+  const vals=[];
   for(const r of state.rows){
     const a=argKeys.map(k=>{const x=r[k];if(typeof x==='number')return x;if(x==null)return NaN;const n=parseMaybeNumber(String(x));return Number.isNaN(n)?NaN:n;});
-    let v;try{v=fn(...a,...hv);}catch(e){v=null;}
+    let v;try{v=fn(a);}catch(e){v=null;}
     vals.push(typeof v==='number'&&isFinite(v)?v:null);
   }
   if(!vals.some(v=>typeof v==='number'))return false;
@@ -1993,7 +2038,7 @@ function applySession(s){
   const tab=s.activeTab||'table';
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===tab));
   document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+tab));
-  state.activeTab=tab; rerenderActive();
+  state.activeTab=tab;if(window.syncTabsA11y)syncTabsA11y(); rerenderActive();
 }
 function currentSvg(holder){return $(holder).querySelector('svg');}
 function dlSvg(holder,name){
@@ -2105,6 +2150,7 @@ function showApp(){
   state.activeTab='table';
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab==='table'));
   document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-table'));
+  if(window.syncTabsA11y)syncTabsA11y();
   renderTable();
 }
 function loadText(text,name){
@@ -2177,13 +2223,24 @@ function wire(){
   document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>loadText(SAMPLES[c.dataset.sample],c.dataset.sample+'.csv'));
   $('#newBtn').onclick=()=>{location.reload();};
 
-  // tabs
-  document.querySelectorAll('.tab').forEach(tab=>tab.onclick=()=>{
+  // tabs (mouse + tastatură: Enter/Space, săgeți, Home/End)
+  const tabEls=[...document.querySelectorAll('.tab')];
+  $('#tabs').setAttribute('role','tablist');
+  tabEls.forEach(t=>{t.setAttribute('role','tab');t.id='tab-'+t.dataset.tab;const pn=$('#panel-'+t.dataset.tab);if(pn){pn.setAttribute('role','tabpanel');pn.setAttribute('aria-labelledby',t.id);}});
+  window.syncTabsA11y=()=>tabEls.forEach(t=>{const on=t.classList.contains('active');t.setAttribute('aria-selected',on?'true':'false');t.tabIndex=on?0:-1;});
+  const goTab=(tab,focus)=>{
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));tab.classList.add('active');
     document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
     $('#panel-'+tab.dataset.tab).classList.add('active');
-    state.activeTab=tab.dataset.tab;rerenderActive();
-  });
+    state.activeTab=tab.dataset.tab;syncTabsA11y();if(focus)tab.focus();rerenderActive();
+  };
+  tabEls.forEach(tab=>{tab.onclick=()=>goTab(tab,false);
+    tab.addEventListener('keydown',e=>{const i=tabEls.indexOf(tab);let j=-1;
+      if(e.key==='ArrowRight')j=(i+1)%tabEls.length;else if(e.key==='ArrowLeft')j=(i+tabEls.length-1)%tabEls.length;
+      else if(e.key==='Home')j=0;else if(e.key==='End')j=tabEls.length-1;
+      else if(e.key==='Enter'||e.key===' '){e.preventDefault();goTab(tab,true);return;}
+      if(j>=0){e.preventDefault();goTab(tabEls[j],true);}});});
+  syncTabsA11y();
 
   // table search (debounced)
   let st;$('#tblSearch').addEventListener('input',e=>{clearTimeout(st);st=setTimeout(()=>{state.search=e.target.value;renderTable();},180);});

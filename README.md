@@ -4,7 +4,7 @@ Atelier de vizualizare și analiză a datelor tabelare, direct în browser.
 
 **Live:** https://chiuta.github.io/DataWeave/
 
-Ultima actualizare: 11 octombrie 2026 · versiune 7.1.1
+Ultima actualizare: 11 octombrie 2026 · versiune 7.1.2
 
 ![Captura de ecran](screenshot.png)
 
@@ -23,6 +23,7 @@ DataWeave este o aplicație HTML dintr-un singur fișier pentru explorarea fiși
 - Pivot cu rânduri, coloane opționale, valoare și agregare; export CSV.
 - Corelații Pearson sau Spearman, cu export SVG/PNG.
 - „Salvează sesiune" / „Încarcă sesiune"; export statistici, JSON, CSV; grafice ca SVG sau PNG.
+- Coloană calculată cu operatori aritmetici, comparații, ternar și funcții (sqrt, log, log10, abs, round, floor, ceil, min, max, pow, exp, sin, cos, pi), evaluate fără `eval`.
 - Temă luminoasă/întunecată (butonul ☾) și interfață în 7 limbi: English, Română, Français, Italiano, Español, Português, Deutsch.
 
 ## Manual de utilizare
@@ -47,6 +48,12 @@ DataWeave este o aplicație HTML dintr-un singur fișier pentru explorarea fiși
 Descarcă `index.html` și deschide-l în browser; nu are nevoie de internet.
 
 ## Istoric / Changelog
+
+### 7.1.2 — 11 octombrie 2026
+- Securitate: coloana calculată folosește un evaluator propriu de expresii (fără `eval`/`new Function`); politica CSP nu mai conține `'unsafe-eval'` și `'unsafe-inline'` pentru scripturi (script-src pe hash SHA-256), iar `worker-src` este `'none'`. Comportamentul formulelor existente este identic (verificat pe 25 de expresii).
+- Formule: funcții noi `floor`, `ceil`, `exp`, `log10`, `sin`, `cos`, constanta `pi` și operatorul ternar `a>b?x:y`, cu indiciu actualizat în toate cele 7 limbi.
+- Accesibilitate: filele sunt acum navigabile de la tastatură (Tab, săgeți, Home/End, Enter/Spațiu), cu roluri ARIA `tablist`/`tab`/`tabpanel`.
+- Tipărire: stil de tipărire care păstrează doar panoul activ.
 
 ### 7.1.1 — 11 octombrie 2026
 - Accesibilitate: titlu h1, zonă principală (main), etichete pentru selectorul de limbă și butonul de temă, regiune de stare pentru notificări; verificare axe fără încălcări.
