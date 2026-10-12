@@ -1,10 +1,10 @@
 # DataWeave
 
+**Versiune:** 7.1.4 · **Ultima actualizare:** 12 octombrie 2026
+
 Atelier de vizualizare și analiză a datelor tabelare, direct în browser.
 
 **Live:** https://chiuta.github.io/DataWeave/
-
-Ultima actualizare: 11 octombrie 2026 · versiune 7.1.3
 
 ![Captura de ecran](screenshot.png)
 
@@ -48,6 +48,9 @@ DataWeave este o aplicație HTML dintr-un singur fișier pentru explorarea fiși
 Descarcă `index.html` și deschide-l în browser; nu are nevoie de internet.
 
 ## Istoric / Changelog
+
+### 7.1.4 — 12 octombrie 2026
+- Versiunea și data ultimei actualizări sunt afișate în aplicație (subsol).
 
 ### 7.1.3 — 11 octombrie 2026
 - Setul demonstrativ Iris conține acum cele 150 de rânduri clasice (înainte 20).

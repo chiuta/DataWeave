@@ -19,13 +19,15 @@
 <html lang="ro">
 <head>
 <meta charset="UTF-8">
+<meta name="application-version" content="7.1.4">
+<meta name="last-updated" content="2026-10-12">
 <style id="tf-a11y-motion">
 /* Accesibilitate: respectă preferința utilizatorului pentru mai puțină mișcare (TROM/a11y). */
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
 }
 </style>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; media-src 'self' blob: data:; object-src 'none'; base-uri 'self'; form-action 'self'; worker-src 'none'; script-src 'self' 'sha256-CJVLC/vPJ1S8ONE/Aopqj7pxhMpUZyA8dMIPQwmLBdU='; connect-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; media-src 'self' blob: data:; object-src 'none'; base-uri 'self'; form-action 'self'; worker-src 'none'; script-src 'self' 'sha256-yJ9t002Juxvy68aj5b+egBi8tCSFvmW58CWKeCzlZIc='; connect-src 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DataWeave — atelier de date offline</title>
 <meta name="description" content="Drag a CSV or JSON into the page and get instant interactive charts, pivot tables and descriptive statistics. No server, no account, no telemetry. One HTML file.">
@@ -520,7 +522,7 @@
   </main>
 
   <footer>
-    <span class="mono">DataWeave · single-file · <span id="ver">v7.1.3</span></span>
+    <span class="mono">DataWeave · single-file · <span data-i18n="versionLbl">Versiune</span> <span id="app-version">v7.1.4 · 2026-10-12</span></span>
     <span data-i18n="footRight">Construit pentru jurnaliști, cercetători și profesori. Datele rămân la tine.</span>
   </footer>
 </div>
@@ -569,6 +571,7 @@ const I18N = {
     corrNote:"Matricea de corelație Pearson între coloanele numerice.",
     corrMethod:"Metodă", mPearson:"Pearson", mSpearman:"Spearman", resetView:"Resetează vizualizarea",
     footRight:"Construit pentru jurnaliști, cercetători și profesori. Datele rămân la tine.",
+    versionLbl:"Versiune",
     none:"(niciuna)", count:"număr", total:"Total general",
     rows:n=>n+" rânduri", cols:n=>n+" coloane", shown:(a,b)=>a+" din "+b+" afișate",
     statN:"n (valori)", statMiss:"lipsă", statUniq:"unice", statMean:"medie", statMedian:"mediană",
@@ -618,6 +621,7 @@ const I18N = {
     corrNote:"Pearson correlation matrix across numeric columns.",
     corrMethod:"Method", mPearson:"Pearson", mSpearman:"Spearman", resetView:"Reset view",
     footRight:"Built for journalists, researchers and teachers. Your data stays with you.",
+    versionLbl:"Version",
     none:"(none)", count:"count", total:"Grand total",
     rows:n=>n+" rows", cols:n=>n+" columns", shown:(a,b)=>a+" of "+b+" shown",
     statN:"n (values)", statMiss:"missing", statUniq:"unique", statMean:"mean", statMedian:"median",
@@ -667,6 +671,7 @@ const I18N = {
     corrNote:"Matrice de corrélation de Pearson entre les colonnes numériques.",
     corrMethod:"Méthode", mPearson:"Pearson", mSpearman:"Spearman", resetView:"Réinitialiser la vue",
     footRight:"Conçu pour les journalistes, chercheurs et enseignants. Vos données restent chez vous.",
+    versionLbl:"Version",
     none:"(aucune)", count:"nombre", total:"Total général",
     rows:n=>n+" lignes", cols:n=>n+" colonnes", shown:(a,b)=>a+" sur "+b+" affichées",
     statN:"n (valeurs)", statMiss:"manquants", statUniq:"uniques", statMean:"moyenne", statMedian:"médiane",
@@ -715,6 +720,7 @@ const I18N = {
     corrNote:"Matrice di correlazione di Pearson tra le colonne numeriche.",
     corrMethod:"Metodo", mPearson:"Pearson", mSpearman:"Spearman", resetView:"Reimposta vista",
     footRight:"Creato per giornalisti, ricercatori e insegnanti. I tuoi dati restano con te.",
+    versionLbl:"Versione",
     none:"(nessuna)", count:"conteggio", total:"Totale generale",
     rows:n=>n+" righe", cols:n=>n+" colonne", shown:(a,b)=>a+" di "+b+" mostrate",
     statN:"n (valori)", statMiss:"mancanti", statUniq:"uniche", statMean:"media", statMedian:"mediana",
@@ -763,6 +769,7 @@ const I18N = {
     corrNote:"Matriz de correlación de Pearson entre columnas numéricas.",
     corrMethod:"Método", mPearson:"Pearson", mSpearman:"Spearman", resetView:"Restablecer vista",
     footRight:"Creado para periodistas, investigadores y docentes. Tus datos se quedan contigo.",
+    versionLbl:"Versión",
     none:"(ninguna)", count:"recuento", total:"Total general",
     rows:n=>n+" filas", cols:n=>n+" columnas", shown:(a,b)=>a+" de "+b+" mostradas",
     statN:"n (valores)", statMiss:"faltantes", statUniq:"únicos", statMean:"media", statMedian:"mediana",
@@ -810,6 +817,7 @@ const I18N = {
     pvRows:"Linhas (agrupar)", pvCols:"Colunas (opcional)", pvVal:"Valor",
     corrNote:"Matriz de correlação de Pearson entre colunas numéricas.",
     footRight:"Feito para jornalistas, investigadores e professores. Os seus dados ficam consigo.",
+    versionLbl:"Versão",
     none:"(nenhuma)", count:"contagem", total:"Total geral",
     rows:n=>n+" linhas", cols:n=>n+" colunas", shown:(a,b)=>a+" de "+b+" mostradas",
     statN:"n (valores)", statMiss:"em falta", statUniq:"únicos", statMean:"média", statMedian:"mediana",
@@ -858,6 +866,7 @@ const I18N = {
     pvRows:"Zeilen (gruppieren)", pvCols:"Spalten (optional)", pvVal:"Wert",
     corrNote:"Pearson-Korrelationsmatrix zwischen numerischen Spalten.",
     footRight:"Für Journalisten, Forschende und Lehrkräfte gemacht. Ihre Daten bleiben bei Ihnen.",
+    versionLbl:"Version",
     none:"(keine)", count:"Anzahl", total:"Gesamtsumme",
     rows:n=>n+" Zeilen", cols:n=>n+" Spalten", shown:(a,b)=>a+" von "+b+" angezeigt",
     statN:"n (Werte)", statMiss:"fehlend", statUniq:"eindeutig", statMean:"Mittelwert", statMedian:"Median",
