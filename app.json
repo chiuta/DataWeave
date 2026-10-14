@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "slug": "dataweave",
+  "name": "DataWeave — atelier de date offline",
+  "version": "7.2.0",
+  "updated": "2026-10-14",
+  "description": "Drag a CSV or JSON into the page and get instant interactive charts, pivot tables and descriptive statistics. No server, no account, no telemetry. One HTML file.",
+  "egress": [],
+  "permissions": [
+    "serviceWorker"
+  ],
+  "storageKeys": [],
+  "sizeBytes": 323458,
+  "sha256": "9f6953a1db4840a1a913b763a206d916289b819c8b1583d67be61aa33f497471",
+  "csp": {
+    "present": true,
+    "directives": {
+      "default-src": "'self'",
+      "img-src": "'self' data: blob:",
+      "style-src": "'self' 'unsafe-inline'",
+      "font-src": "'self' data:",
+      "media-src": "'self' blob: data:",
+      "object-src": "'none'",
+      "base-uri": "'self'",
+      "form-action": "'self'",
+      "worker-src": "'self'",
+      "script-src": "'self' sha256×3",
+      "connect-src": "'none'",
+      "manifest-src": "'self'"
+    },
+    "scriptInline": "hash",
+    "connect": "'none'"
+  },
+  "features": {
+    "export": true,
+    "import": true,
+    "i18n": [
+      "ro",
+      "en",
+      "fr",
+      "it",
+      "es",
+      "pt",
+      "de"
+    ],
+    "pwa": {
+      "manifest": true,
+      "serviceWorker": true
+    },
+    "modules": [
+      "core",
+      "label",
+      "bundle",
+      "pii",
+      "search"
+    ]
+  },
+  "kit": {
+    "version": "1.0.0",
+    "modules": [
+      "core",
+      "label",
+      "bundle",
+      "pii",
+      "search"
+    ]
+  },
+  "selfSerializing": false
+}

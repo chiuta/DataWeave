@@ -1,6 +1,6 @@
 # DataWeave
 
-**Versiune:** 7.1.4 · **Ultima actualizare:** 12 octombrie 2026
+**Versiune:** 7.2.0 · **Ultima actualizare:** 14 octombrie 2026
 
 Atelier de vizualizare și analiză a datelor tabelare, direct în browser.
 
@@ -26,6 +26,13 @@ DataWeave este o aplicație HTML dintr-un singur fișier pentru explorarea fiși
 - Coloană calculată cu operatori aritmetici, comparații, ternar și funcții (sqrt, log, log10, abs, round, floor, ceil, min, max, pow, exp, sin, cos, pi), evaluate fără `eval`.
 - Temă luminoasă/întunecată (butonul ☾) și interfață în 7 limbi: English, Română, Français, Italiano, Español, Português, Deutsch.
 
+## Funcții noi (7.2.0)
+
+- **Căutare în tabel după relevanță** (BM25, toleranță la greșeli de scriere, diacritice ignorate), atunci când tabelul nu are o sortare manuală; indicatorul arată „· după relevanță”. Se aplică la cel mult 20000 de rânduri; peste această limită rămâne căutarea literală veche.
+- **„Date personale”**: scanează local celulele vizibile (e-mail, telefon, IBAN, CNP, card, IP, secrete; opțional nume/adrese, cu multe false pozitive), afișează un tabel cu potrivirile și exportă un CSV cu valorile mascate (înlocuire completă sau parțială). Rezultatele sunt orientative: lipsa unei potriviri nu garantează că datele nu conțin informații personale.
+- Modulele comune „fff-kit” sunt incluse (versiunea în subsol deschide dialogul de transparență); aplicația nu folosește stocare, deci dialogul de copie de siguranță nu are ce salva.
+- Textele noi sunt în cele 7 limbi ale interfeței; **traducerile nu au fost verificate de vorbitori nativi.**
+
 ## Manual de utilizare
 
 1. Alege limba din meniul de limbă.
@@ -48,6 +55,11 @@ DataWeave este o aplicație HTML dintr-un singur fișier pentru explorarea fiși
 Descarcă `index.html` și deschide-l în browser; nu are nevoie de internet.
 
 ## Istoric / Changelog
+
+### 7.2.0 — 14 octombrie 2026
+- Căutare în tabel după relevanță (FFF.search), cu păstrarea sortării manuale.
+- „Date personale”: scanare locală și export CSV mascat (FFF.pii).
+- Module comune core, label, bundle, search, pii; teste noi: `tests/fff-r8.test.mjs`.
 
 ### 7.1.4 — 12 octombrie 2026
 - Versiunea și data ultimei actualizări sunt afișate în aplicație (subsol).
