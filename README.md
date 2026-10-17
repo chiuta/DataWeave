@@ -48,7 +48,7 @@ DataWeave este o aplicație HTML dintr-un singur fișier pentru explorarea fiși
 ## Confidențialitate și rețea
 
 - Aplicația nu folosește `localStorage`, `sessionStorage` sau IndexedDB și nu face cereri de rețea (fără `fetch`, CDN sau scripturi externe). Datele încărcate sunt prelucrate în memorie și dispar la reîncărcare, în afară de ce salvezi tu prin exporturi.
-- Conține doar link-uri, deschise la click, către Patreon, Buy Me a Coffee și chiuta.github.io.
+- Conține doar link-uri, deschise la click, către Buy Me a Coffee și chiuta.github.io.
 
 ## Rulare locală / offline
 
