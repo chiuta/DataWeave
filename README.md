@@ -1,95 +1,93 @@
 # DataWeave
 
-**Versiune:** 7.2.0 · **Ultima actualizare:** 14 octombrie 2026
+**English** · [Română](README.ro.md) · [Français](README.fr.md) · [Italiano](README.it.md) · [Español](README.es.md) · [Português](README.pt.md) · [Deutsch](README.de.md) · [Magyar](README.hu.md)
 
-Atelier de vizualizare și analiză a datelor tabelare, direct în browser.
+**Version:** 7.2.0 · **Last updated:** 2026-10-14
 
-**Live:** https://chiuta.github.io/DataWeave/
+A workshop for visualising and analysing tabular data, right in the browser.
 
-![Captura de ecran](screenshot.png)
+**Live app:** https://chiuta.github.io/DataWeave/
 
-## Ce este
+![Screenshot](screenshot.png)
 
-DataWeave este o aplicație HTML dintr-un singur fișier pentru explorarea fișierelor CSV, TSV și JSON: tabel, statistici, grafice, tabel pivot și corelații. Este gândită, după cum spune aplicația, pentru jurnaliști, cercetători și profesori; datele rămân pe dispozitivul tău.
+## What it is
 
-## Funcții
+DataWeave is a single-file HTML application for exploring CSV, TSV and JSON files: table, statistics, charts, pivot table and correlations. It is designed, as the app puts it, for journalists, researchers and teachers; your data stays on your device.
 
-- Încărcare prin tragere de fișier, „Alege fișier" sau „Lipește date" (CSV, TSV, JSON); trei seturi demonstrative: Iris (flori, cele 150 de rânduri clasice), Orașe Europa, Vânzări lunare.
-- Filele Tabel (sortare prin click oriunde pe celula antetului sau Enter/Spațiu pe nume), Statistici, Grafice, Pivot, Corelații.
-- Filtre multiple („+ Adaugă", „Șterge tot").
-- Unelte de date: elimină duplicate, curăță spații, coloană calculată, reordonare și ascundere coloane.
-- Grafice: bare, linie, scatter, histogramă, box-plot, heatmap, plăcintă; agregări (sumă, medie, mediană, număr, min, max, deviație standard), culoare după coloană, Top-N, orizontal, etichete de valori, stivuit.
-- Regresie (liniară, logaritmică, exponențială, putere, polinomială grad 2 și 3), intervale de încredere și de predicție (90/95/99%), curbă normală, medie/mediană, medie mobilă.
-- Pivot cu rânduri, coloane opționale, valoare și agregare; export CSV.
-- Corelații Pearson sau Spearman, cu export SVG/PNG.
-- „Salvează sesiune" / „Încarcă sesiune"; export statistici, JSON, CSV; grafice ca SVG sau PNG.
-- Coloană calculată cu operatori aritmetici, comparații, ternar și funcții (sqrt, log, log10, abs, round, floor, ceil, min, max, pow, exp, sin, cos, pi), evaluate fără `eval`.
-- Temă luminoasă/întunecată (butonul ☾) și interfață în 7 limbi: English, Română, Français, Italiano, Español, Português, Deutsch.
+## Features
 
-## Funcții noi (7.2.0)
+- Loading by dragging a file, "Choose file" or "Paste data" (CSV, TSV, JSON); three demo datasets: Iris (flowers, the classic 150 rows), European Cities, Monthly Sales.
+- The Table tabs (sorting by clicking anywhere on the header cell or Enter/Space on the name), Statistics, Charts, Pivot, Correlations.
+- Multiple filters ("+ Add", "Clear all").
+- Data tools: remove duplicates, trim whitespace, computed column, reorder and hide columns.
+- Charts: bar, line, scatter, histogram, box plot, heatmap, pie; aggregations (sum, mean, median, count, min, max, standard deviation), colour by column, Top-N, horizontal, value labels, stacked.
+- Regression (linear, logarithmic, exponential, power, polynomial of degree 2 and 3), confidence and prediction intervals (90/95/99%), normal curve, mean/median, moving average.
+- Pivot with rows, optional columns, value and aggregation; CSV export.
+- Pearson or Spearman correlations, with SVG/PNG export.
+- "Save session" / "Load session"; export of statistics, JSON, CSV; charts as SVG or PNG.
+- Computed column with arithmetic operators, comparisons, ternary and functions (sqrt, log, log10, abs, round, floor, ceil, min, max, pow, exp, sin, cos, pi), evaluated without `eval`.
+- Light/dark theme (the ☾ button) and interface in 7 languages: English, Română, Français, Italiano, Español, Português, Deutsch.
 
-- **Căutare în tabel după relevanță** (BM25, toleranță la greșeli de scriere, diacritice ignorate), atunci când tabelul nu are o sortare manuală; indicatorul arată „· după relevanță”. Se aplică la cel mult 20000 de rânduri; peste această limită rămâne căutarea literală veche.
-- **„Date personale”**: scanează local celulele vizibile (e-mail, telefon, IBAN, CNP, card, IP, secrete; opțional nume/adrese, cu multe false pozitive), afișează un tabel cu potrivirile și exportă un CSV cu valorile mascate (înlocuire completă sau parțială). Rezultatele sunt orientative: lipsa unei potriviri nu garantează că datele nu conțin informații personale.
-- Modulele comune „fff-kit” sunt incluse (versiunea în subsol deschide dialogul de transparență); aplicația nu folosește stocare, deci dialogul de copie de siguranță nu are ce salva.
-- Textele noi sunt în cele 7 limbi ale interfeței; **traducerile nu au fost verificate de vorbitori nativi.**
+## New features (7.2.0)
 
-## Manual de utilizare
+- **Table search by relevance** (BM25, tolerance for typos, diacritics ignored), when the table has no manual sort; the indicator shows "· by relevance". It applies to at most 20000 rows; above that limit the old literal search remains.
+- **"Personal data"**: locally scans the visible cells (e-mail, phone, IBAN, CNP, card, IP, secrets; optionally names/addresses, with many false positives), displays a table of the matches and exports a CSV with masked values (full or partial replacement). The results are indicative: the absence of a match does not guarantee that the data contains no personal information.
+- The shared "fff-kit" modules are included (the version in the footer opens the transparency dialog); the app uses no storage, so the backup dialog has nothing to save.
+- The new texts are in the 7 interface languages; **the translations have not been checked by native speakers.**
 
-1. Alege limba din meniul de limbă.
-2. În „Date noi" trage un fișier CSV/TSV/JSON, apasă „Alege fișier" sau „Lipește date" (apoi „Încarcă"); alternativ, alege un set demonstrativ.
-3. În fila Tabel sortezi cu click pe antet; „+ Adaugă" la Filtre adaugă o condiție (Enter confirmă).
-4. În „Unelte date" poți elimina duplicate, curăța spații, crea o „+ Coloană calculată" sau reordona/ascunde coloane.
-5. În Grafice alegi tipul, axele X și Y și agregarea, apoi opțional regresia sau intervalele; descarcă cu „⬇ SVG" / „⬇ PNG".
-6. În Pivot alegi rânduri, coloane, valoare și agregare, apoi „Export CSV".
-7. În Corelații alegi metoda (Pearson sau Spearman).
-8. „Salvează sesiune" păstrează lucrul într-un fișier, pe care îl reiei cu „Încarcă sesiune".
-9. Esc închide panourile deschise (formular de coloană, zona de lipire, fereastra „Despre").
+## User guide
 
-## Confidențialitate și rețea
+1. Choose the language from the language menu.
+2. Under "New data" drag a CSV/TSV/JSON file, press "Choose file" or "Paste data" (then "Load"); alternatively, choose a demo dataset.
+3. In the Table tab you sort by clicking the header; "+ Add" under Filters adds a condition (Enter confirms).
+4. Under "Data tools" you can remove duplicates, trim whitespace, create a "+ Computed column" or reorder/hide columns.
+5. In Charts you choose the type, the X and Y axes and the aggregation, then optionally the regression or the intervals; download with "⬇ SVG" / "⬇ PNG".
+6. In Pivot you choose rows, columns, value and aggregation, then "Export CSV".
+7. In Correlations you choose the method (Pearson or Spearman).
+8. "Save session" keeps your work in a file, which you resume with "Load session".
+9. Esc closes the open panels (column form, paste area, the "About" window).
 
-- Aplicația nu folosește `localStorage`, `sessionStorage` sau IndexedDB și nu face cereri de rețea (fără `fetch`, CDN sau scripturi externe). Datele încărcate sunt prelucrate în memorie și dispar la reîncărcare, în afară de ce salvezi tu prin exporturi.
-- Conține doar link-uri, deschise la click, către Buy Me a Coffee și chiuta.github.io.
+## Privacy and network
 
-## Rulare locală / offline
+- The app does not use `localStorage`, `sessionStorage` or IndexedDB and makes no network requests (no `fetch`, CDN or external scripts). Loaded data is processed in memory and disappears on reload, apart from what you save through exports.
+- It contains only links, opened on click, to Buy Me a Coffee and chiuta.github.io.
 
-Descarcă `index.html` și deschide-l în browser; nu are nevoie de internet.
+## Running locally / offline
 
-## Istoric / Changelog
+Download `index.html` and open it in a browser; it does not need internet.
 
-### 7.2.0 — 14 octombrie 2026
-- Căutare în tabel după relevanță (FFF.search), cu păstrarea sortării manuale.
-- „Date personale”: scanare locală și export CSV mascat (FFF.pii).
-- Module comune core, label, bundle, search, pii; teste noi: `tests/fff-r8.test.mjs`.
+## History / Changelog
 
-### 7.1.4 — 12 octombrie 2026
-- Versiunea și data ultimei actualizări sunt afișate în aplicație (subsol).
+### 7.2.0 — 14 October 2026
+- Table search by relevance (FFF.search), keeping manual sorting.
+- "Personal data": local scan and masked CSV export (FFF.pii).
+- Shared modules core, label, bundle, search, pii; new tests: `tests/fff-r8.test.mjs`.
 
-### 7.1.3 — 11 octombrie 2026
-- Setul demonstrativ Iris conține acum cele 150 de rânduri clasice (înainte 20).
-- Sortarea se declanșează de la click oriunde pe celula antetului (nu doar pe nume), are `aria-sort` și funcționează de la tastatură; selectorul de tip nu sortează.
-- Corecție la asimetrie (skewness): formula ajustată folosește acum abaterea standard a populației în standardizare (verificată față de scipy `skew(bias=False)`).
-- Abaterea standard este etichetată „(n−1)” (eșantion) în toate cele 7 limbi.
-- CSP: `connect-src 'none'` (aplicația nu face nicio cerere de rețea).
+### 7.1.4 — 12 October 2026
+- The version and the date of the last update are shown in the app (footer).
 
-### 7.1.2 — 11 octombrie 2026
-- Securitate: coloana calculată folosește un evaluator propriu de expresii (fără `eval`/`new Function`); politica CSP nu mai conține `'unsafe-eval'` și `'unsafe-inline'` pentru scripturi (script-src pe hash SHA-256), iar `worker-src` este `'none'`. Comportamentul formulelor existente este identic (verificat pe 25 de expresii).
-- Formule: funcții noi `floor`, `ceil`, `exp`, `log10`, `sin`, `cos`, constanta `pi` și operatorul ternar `a>b?x:y`, cu indiciu actualizat în toate cele 7 limbi.
-- Accesibilitate: filele sunt acum navigabile de la tastatură (Tab, săgeți, Home/End, Enter/Spațiu), cu roluri ARIA `tablist`/`tab`/`tabpanel`.
-- Tipărire: stil de tipărire care păstrează doar panoul activ.
+### 7.1.3 — 11 October 2026
+- The Iris demo dataset now contains the classic 150 rows (previously 20).
+- Sorting is triggered by a click anywhere on the header cell (not only on the name), has `aria-sort` and works from the keyboard; the type selector does not sort.
+- Skewness fix: the adjusted formula now uses the population standard deviation in standardisation (checked against scipy `skew(bias=False)`).
+- The standard deviation is labelled "(n−1)" (sample) in all 7 languages.
+- CSP: `connect-src 'none'` (the app makes no network requests at all).
 
-### 7.1.1 — 11 octombrie 2026
-- Accesibilitate: titlu h1, zonă principală (main), etichete pentru selectorul de limbă și butonul de temă, regiune de stare pentru notificări; verificare axe fără încălcări.
-- Fila Corelații: legendă explicativă și cea mai puternică pereche de coloane, în toate cele 7 limbi.
-- Actualizare versiune la v7.1.1.
+### 7.1.2 — 11 October 2026
+- Security: the computed column uses its own expression evaluator (no `eval`/`new Function`); the CSP no longer contains `'unsafe-eval'` and `'unsafe-inline'` for scripts (script-src by SHA-256 hash), and `worker-src` is `'none'`. The behaviour of existing formulas is identical (checked on 25 expressions).
+- Formulas: new functions `floor`, `ceil`, `exp`, `log10`, `sin`, `cos`, the constant `pi` and the ternary operator `a>b?x:y`, with the hint updated in all 7 languages.
+- Accessibility: tabs are now keyboard-navigable (Tab, arrows, Home/End, Enter/Space), with ARIA roles `tablist`/`tab`/`tabpanel`.
+- Printing: a print style that keeps only the active panel.
 
-## Licență
+### 7.1.1 — 11 October 2026
+- Accessibility: h1 heading, main area (main), labels for the language selector and the theme button, status region for notifications; axe check without violations.
+- Correlations tab: explanatory legend and the strongest pair of columns, in all 7 languages.
+- Version updated to v7.1.1.
 
-MIT — vezi fișierul LICENSE
+## License
 
-## Autor
+MIT — see the LICENSE file
+
+## Author
 
 Alexio — Alexandru-Ionuț Chiuță, contact: alexio@trom.tf
-
-## English summary
-
-DataWeave is a single-file HTML workshop for exploring CSV, TSV and JSON data: table, statistics, charts (bar, line, scatter, histogram, box-plot, heatmap, pie, with regression and confidence intervals), pivot and correlations. Sessions and results can be exported. 7 UI languages. It stores nothing in the browser and makes no network requests.
