@@ -94,6 +94,6 @@ MIT — vezi fișierul LICENSE
 
 Alexio — Alexandru-Ionuț Chiuță, contact: alexio@trom.tf
 
-## English summary
+## Rezumat
 
-DataWeave is a single-file HTML workshop for exploring CSV, TSV and JSON data: table, statistics, charts (bar, line, scatter, histogram, box-plot, heatmap, pie, with regression and confidence intervals), pivot and correlations. Sessions and results can be exported. 7 UI languages. It stores nothing in the browser and makes no network requests.
+DataWeave este un atelier într-un singur fișier HTML pentru explorarea datelor CSV, TSV și JSON: tabel, statistici, grafice (bare, linii, dispersie, histogramă, box-plot, hartă termică, plăcintă, cu regresie și intervale de încredere), pivot și corelații. Sesiunile și rezultatele pot fi exportate. 7 limbi de interfață. Nu stochează nimic în browser și nu face cereri de rețea.
