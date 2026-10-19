@@ -4,6 +4,8 @@
 
 **Versione:** 7.2.0 · **Ultimo aggiornamento:** 2026-10-14
 
+Lingue dell'interfaccia: **Română, English, Français, Italiano, Español, Português (PT), Deutsch, Magyar**
+
 Laboratorio di visualizzazione e analisi di dati tabellari, direttamente nel browser.
 
 **Applicazione online:** https://chiuta.github.io/DataWeave/

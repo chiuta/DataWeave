@@ -4,6 +4,8 @@
 
 **Versiune:** 7.2.0 · **Ultima actualizare:** 2026-10-14
 
+Limbile interfeței: **Română, English, Français, Italiano, Español, Português (PT), Deutsch, Magyar**
+
 Atelier de vizualizare și analiză a datelor tabelare, direct în browser.
 
 **Live:** https://chiuta.github.io/DataWeave/

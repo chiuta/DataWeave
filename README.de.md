@@ -4,6 +4,8 @@
 
 **Version:** 7.2.0 · **Zuletzt aktualisiert:** 2026-10-14
 
+Oberflächensprachen: **Română, English, Français, Italiano, Español, Português (PT), Deutsch, Magyar**
+
 Werkstatt zur Visualisierung und Analyse tabellarischer Daten, direkt im Browser.
 
 **Online-App:** https://chiuta.github.io/DataWeave/

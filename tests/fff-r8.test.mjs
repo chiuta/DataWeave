@@ -38,7 +38,7 @@ const firstCol = (page) => page.$$eval('#dataTable tbody tr', (trs) => trs.map((
 
 {
   const {ctx, page, errs, net} = await open();
-  check('versiune 7.2.0 în meta și #app-version', await page.evaluate(() => document.querySelector('meta[name=application-version]').content === '7.2.0' && /^v7\.2\.0 · 2026-10-14$/.test(document.getElementById('app-version').textContent.trim())));
+  check('versiune 7.3.0 în meta și #app-version', await page.evaluate(() => document.querySelector('meta[name=application-version]').content === '7.3.0' && /^v7\.3\.0 · 2026-10-19$/.test(document.getElementById('app-version').textContent.trim())));
   check('buton „Date personale” vizibil cu kitul', await page.evaluate(() => !document.getElementById('btnPii').hidden));
   await page.evaluate((t) => loadText(t, 'persoane.csv'), CSV);
   await page.waitForTimeout(300);

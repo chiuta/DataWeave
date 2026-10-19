@@ -4,6 +4,8 @@
 
 **Verzió:** 7.2.0 · **Utolsó frissítés:** 2026-10-14
 
+A felület nyelvei: **Română, English, Français, Italiano, Español, Português (PT), Deutsch, Magyar**
+
 Táblázatos adatok megjelenítésére és elemzésére szolgáló műhely, közvetlenül a böngészőben.
 
 **Online alkalmazás:** https://chiuta.github.io/DataWeave/

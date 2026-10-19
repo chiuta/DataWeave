@@ -4,6 +4,8 @@
 
 **Versão:** 7.2.0 · **Última atualização:** 2026-10-14
 
+Idiomas da interface: **Română, English, Français, Italiano, Español, Português (PT), Deutsch, Magyar**
+
 Oficina de visualização e análise de dados tabulares, diretamente no navegador.
 
 **Aplicação online:** https://chiuta.github.io/DataWeave/
