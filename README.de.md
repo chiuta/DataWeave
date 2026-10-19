@@ -94,6 +94,5 @@ MIT — siehe Datei LICENSE
 
 Alexio — Alexandru-Ionuț Chiuță, Kontakt: alexio@trom.tf
 
-## Zusammenfassung auf Englisch
-
+## Zusammenfassung
 DataWeave ist eine HTML-Werkstatt in einer einzigen Datei zum Erkunden von CSV-, TSV- und JSON-Daten: Tabelle, Statistiken, Diagramme (Balken, Linie, Streudiagramm, Histogramm, Boxplot, Heatmap, Kreisdiagramm, mit Regression und Konfidenzintervallen), Pivot und Korrelationen. Sitzungen und Ergebnisse können exportiert werden. Oberfläche in 7 Sprachen. Es speichert nichts im Browser und stellt keine Netzwerkanfragen.

@@ -94,6 +94,5 @@ MIT — lásd a LICENSE fájlt
 
 Alexio — Alexandru-Ionuț Chiuță, kapcsolat: alexio@trom.tf
 
-## Angol nyelvű összefoglaló
-
+## Összefoglaló
 A DataWeave egyetlen fájlból álló HTML-műhely CSV-, TSV- és JSON-adatok felfedezéséhez: táblázat, statisztikák, diagramok (oszlop, vonal, pontdiagram, hisztogram, dobozdiagram, hőtérkép, kördiagram, regresszióval és konfidenciaintervallumokkal), pivot és korrelációk. A munkamenetek és az eredmények exportálhatók. Felület 7 nyelven. Nem tárol semmit a böngészőben, és nem kezdeményez hálózati kéréseket.

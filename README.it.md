@@ -94,6 +94,5 @@ MIT — vedi il file LICENSE
 
 Alexio — Alexandru-Ionuț Chiuță, contatto: alexio@trom.tf
 
-## Riepilogo in inglese
-
+## Riepilogo
 DataWeave è un laboratorio HTML in un unico file per esplorare dati CSV, TSV e JSON: tabella, statistiche, grafici (barre, linee, dispersione, istogramma, box plot, mappa di calore, torta, con regressione e intervalli di confidenza), pivot e correlazioni. Sessioni e risultati possono essere esportati. Interfaccia in 7 lingue. Non memorizza nulla nel browser e non effettua richieste di rete.
