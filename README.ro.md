@@ -10,7 +10,7 @@ Atelier de vizualizare și analiză a datelor tabelare, direct în browser.
 
 **Live:** https://chiuta.github.io/DataWeave/
 
-![Captura de ecran](screenshot.png)
+![Captura de ecran](screenshot.ro.png)
 
 ## Ce este
 

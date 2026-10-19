@@ -10,7 +10,7 @@ Atelier de visualisation et d'analyse de données tabulaires, directement dans l
 
 **Application en ligne :** https://chiuta.github.io/DataWeave/
 
-![Capture d'écran](screenshot.png)
+![Capture d'écran](screenshot.fr.png)
 
 ## Ce que c'est
 

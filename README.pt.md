@@ -10,7 +10,7 @@ Oficina de visualização e análise de dados tabulares, diretamente no navegado
 
 **Aplicação online:** https://chiuta.github.io/DataWeave/
 
-![Captura de ecrã](screenshot.png)
+![Captura de ecrã](screenshot.pt.png)
 
 ## O que é
 

@@ -10,7 +10,7 @@ A workshop for visualising and analysing tabular data, right in the browser.
 
 **Live app:** https://chiuta.github.io/DataWeave/
 
-![Screenshot](screenshot.png)
+![Screenshot](screenshot.en.png)
 
 ## What it is
 

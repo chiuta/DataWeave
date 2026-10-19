@@ -10,7 +10,7 @@ Taller de visualización y análisis de datos tabulares, directamente en el nave
 
 **Aplicación en línea:** https://chiuta.github.io/DataWeave/
 
-![Captura de pantalla](screenshot.png)
+![Captura de pantalla](screenshot.es.png)
 
 ## Qué es
 

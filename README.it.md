@@ -10,7 +10,7 @@ Laboratorio di visualizzazione e analisi di dati tabellari, direttamente nel bro
 
 **Applicazione online:** https://chiuta.github.io/DataWeave/
 
-![Schermata](screenshot.png)
+![Schermata](screenshot.it.png)
 
 ## Che cos'è
 

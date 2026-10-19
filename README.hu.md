@@ -10,7 +10,7 @@ Táblázatos adatok megjelenítésére és elemzésére szolgáló műhely, köz
 
 **Online alkalmazás:** https://chiuta.github.io/DataWeave/
 
-![Képernyőkép](screenshot.png)
+![Képernyőkép](screenshot.hu.png)
 
 ## Mi ez
 

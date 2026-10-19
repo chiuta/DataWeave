@@ -10,7 +10,7 @@ Werkstatt zur Visualisierung und Analyse tabellarischer Daten, direkt im Browser
 
 **Online-App:** https://chiuta.github.io/DataWeave/
 
-![Screenshot](screenshot.png)
+![Screenshot](screenshot.de.png)
 
 ## Was es ist
 
