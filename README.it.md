@@ -2,7 +2,7 @@
 
 [English](README.md) · [Română](README.ro.md) · [Français](README.fr.md) · **Italiano** · [Español](README.es.md) · [Português](README.pt.md) · [Deutsch](README.de.md) · [Magyar](README.hu.md)
 
-**Versione:** 7.3.3 · **Ultimo aggiornamento:** 2026-10-22
+**Versione:** 7.3.4 · **Ultimo aggiornamento:** 2026-10-22
 
 Lingue dell'interfaccia: **Română, English, Français, Italiano, Español, Português (PT), Deutsch, Magyar**
 
@@ -32,6 +32,7 @@ DataWeave è un'applicazione HTML in un unico file per esplorare file CSV, TSV e
 
 ## Novità (7.2.0)
 
+- 7.3.4 — 2026-10-22: fff-kit 1.1.2: PBKDF2 600.000 iterazioni, protezione anti-clickjacking
 - **Ricerca nella tabella per rilevanza** (BM25, tolleranza agli errori di battitura, diacritici ignorati), quando la tabella non ha un ordinamento manuale; l'indicatore mostra «· per rilevanza». Si applica a un massimo di 20000 righe; oltre questo limite resta la vecchia ricerca letterale.
 - **«Dati personali»**: scansiona localmente le celle visibili (e-mail, telefono, IBAN, CNP, carta, IP, segreti; facoltativamente nomi/indirizzi, con molti falsi positivi), mostra una tabella delle corrispondenze ed esporta un CSV con i valori mascherati (sostituzione completa o parziale). I risultati sono indicativi: l'assenza di una corrispondenza non garantisce che i dati non contengano informazioni personali.
 - I moduli comuni «fff-kit» sono inclusi (la versione nel piè di pagina apre la finestra di trasparenza); l'applicazione non usa archiviazione, quindi la finestra di copia di riserva non ha nulla da salvare.
