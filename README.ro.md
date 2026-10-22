@@ -2,7 +2,7 @@
 
 [English](README.md) · **Română** · [Français](README.fr.md) · [Italiano](README.it.md) · [Español](README.es.md) · [Português](README.pt.md) · [Deutsch](README.de.md) · [Magyar](README.hu.md)
 
-**Versiune:** 7.3.1 · **Ultima actualizare:** 2026-10-22
+**Versiune:** 7.3.2 · **Ultima actualizare:** 2026-10-22
 
 Limbile interfeței: **Română, English, Français, Italiano, Español, Português (PT), Deutsch, Magyar**
 
@@ -60,6 +60,7 @@ Descarcă `index.html` și deschide-l în browser; nu are nevoie de internet.
 
 ## Istoric / Changelog
 
+- 7.3.2 — 2026-10-22: **remediere**: seturile demonstrative, butoanele de exemplu, exemplul de lipire, contoarele goale de rânduri/coloane și etichetele selectorului de limbă urmează acum limba aleasă.
 - 7.3.1 — 2026-10-22: **remediere**: titlul paginii urmează acum limba aleasă.
 ### 7.2.0 — 14 octombrie 2026
 - Căutare în tabel după relevanță (FFF.search), cu păstrarea sortării manuale.

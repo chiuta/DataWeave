@@ -2,7 +2,7 @@
 
 **English** · [Română](README.ro.md) · [Français](README.fr.md) · [Italiano](README.it.md) · [Español](README.es.md) · [Português](README.pt.md) · [Deutsch](README.de.md) · [Magyar](README.hu.md)
 
-**Version:** 7.3.1 · **Last updated:** 2026-10-22
+**Version:** 7.3.2 · **Last updated:** 2026-10-22
 
 Interface languages: **Română, English, Français, Italiano, Español, Português (PT), Deutsch, Magyar**
 
@@ -60,6 +60,7 @@ Download `index.html` and open it in a browser; it does not need internet.
 
 ## History / Changelog
 
+- 7.3.2 — 2026-10-22: **fix**: demo datasets, sample chips, paste example, empty row/column counters and language-selector labels now follow the selected language.
 - 7.3.1 — 2026-10-22: **fix**: the page title now follows the selected language.
 ### 7.2.0 — 14 October 2026
 - Table search by relevance (FFF.search), keeping manual sorting.

@@ -2,7 +2,7 @@
 
 [English](README.md) · [Română](README.ro.md) · **Français** · [Italiano](README.it.md) · [Español](README.es.md) · [Português](README.pt.md) · [Deutsch](README.de.md) · [Magyar](README.hu.md)
 
-**Version :** 7.3.1 · **Dernière mise à jour :** 2026-10-22
+**Version :** 7.3.2 · **Dernière mise à jour :** 2026-10-22
 
 Langues de l'interface : **Română, English, Français, Italiano, Español, Português (PT), Deutsch, Magyar**
 
@@ -60,6 +60,7 @@ Téléchargez `index.html` et ouvrez-le dans le navigateur ; aucune connexion in
 
 ## Historique / Changelog
 
+- 7.3.2 — 2026-10-22: **correctif** : les jeux de données de démonstration, les puces d’exemple, l’exemple de collage, les compteurs vides de lignes/colonnes et les libellés du sélecteur de langue suivent désormais la langue choisie.
 - 7.3.1 — 2026-10-22: **correctif** : le titre de la page suit désormais la langue choisie.
 ### 7.2.0 — 14 octobre 2026
 - Recherche dans le tableau par pertinence (FFF.search), avec conservation du tri manuel.

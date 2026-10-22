@@ -2,7 +2,7 @@
 
 [English](README.md) · [Română](README.ro.md) · [Français](README.fr.md) · [Italiano](README.it.md) · [Español](README.es.md) · [Português](README.pt.md) · **Deutsch** · [Magyar](README.hu.md)
 
-**Version:** 7.3.1 · **Zuletzt aktualisiert:** 2026-10-22
+**Version:** 7.3.2 · **Zuletzt aktualisiert:** 2026-10-22
 
 Oberflächensprachen: **Română, English, Français, Italiano, Español, Português (PT), Deutsch, Magyar**
 
@@ -60,6 +60,7 @@ Lade `index.html` herunter und öffne die Datei im Browser; es ist kein Internet
 
 ## Verlauf / Changelog
 
+- 7.3.2 — 2026-10-22: **Korrektur**: Demodatensätze, Beispiel-Chips, Einfüge-Beispiel, leere Zeilen-/Spaltenzähler und Beschriftungen der Sprachauswahl folgen jetzt der gewählten Sprache.
 - 7.3.1 — 2026-10-22: **Korrektur**: der Seitentitel folgt jetzt der gewählten Sprache.
 ### 7.2.0 — 14. Oktober 2026
 - Tabellensuche nach Relevanz (FFF.search), bei erhaltener manueller Sortierung.
