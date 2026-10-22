@@ -2,7 +2,7 @@
 
 [English](README.md) · [Română](README.ro.md) · [Français](README.fr.md) · [Italiano](README.it.md) · [Español](README.es.md) · [Português](README.pt.md) · **Deutsch** · [Magyar](README.hu.md)
 
-**Version:** 7.3.2 · **Zuletzt aktualisiert:** 2026-10-22
+**Version:** 7.3.3 · **Zuletzt aktualisiert:** 2026-10-22
 
 Oberflächensprachen: **Română, English, Français, Italiano, Español, Português (PT), Deutsch, Magyar**
 
@@ -62,6 +62,10 @@ Lade `index.html` herunter und öffne die Datei im Browser; es ist kein Internet
 
 - 7.3.2 — 2026-10-22: **Korrektur**: Demodatensätze, Beispiel-Chips, Einfüge-Beispiel, leere Zeilen-/Spaltenzähler und Beschriftungen der Sprachauswahl folgen jetzt der gewählten Sprache.
 - 7.3.1 — 2026-10-22: **Korrektur**: der Seitentitel folgt jetzt der gewählten Sprache.
+### 7.3.3 — 2026-10-22
+- Anzeige „Daten im Speicher“ neben den Dateiinfos (Größe des geladenen Textes; JS-Speicher des Tabs im Tooltip, falls der Browser ihn meldet), Warnung bei Dateien über 50 MB und Meldung, wenn das Lesen der Datei fehlschlägt.
+- Mobil: kein Text unter 12 px und Touch-Ziele von mindestens 24 px (WCAG 2.5.8).
+
 ### 7.2.0 — 14. Oktober 2026
 - Tabellensuche nach Relevanz (FFF.search), bei erhaltener manueller Sortierung.
 - „Personenbezogene Daten“: lokaler Scan und maskierter CSV-Export (FFF.pii).

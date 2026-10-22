@@ -2,7 +2,7 @@
 
 [English](README.md) · [Română](README.ro.md) · [Français](README.fr.md) · [Italiano](README.it.md) · [Español](README.es.md) · [Português](README.pt.md) · [Deutsch](README.de.md) · **Magyar**
 
-**Verzió:** 7.3.2 · **Utolsó frissítés:** 2026-10-22
+**Verzió:** 7.3.3 · **Utolsó frissítés:** 2026-10-22
 
 A felület nyelvei: **Română, English, Français, Italiano, Español, Português (PT), Deutsch, Magyar**
 
@@ -62,6 +62,10 @@ Töltsd le az `index.html` fájlt, és nyisd meg böngészőben; nem igényel in
 
 - 7.3.2 — 2026-10-22: **javítás**: a bemutató adathalmazok, a minta-chipek, a beillesztési példa, az üres sor-/oszlopszámlálók és a nyelvválasztó feliratai mostantól a kiválasztott nyelvet követik.
 - 7.3.1 — 2026-10-22: **javítás**: az oldal címe mostantól a kiválasztott nyelvet követi.
+### 7.3.3 — 2026-10-22
+- „Adatok a memóriában” jelző a fájlinfó mellett (a betöltött szöveg mérete; a lap JS-memóriája a súgóban, ha a böngésző jelzi), figyelmeztetés 50 MB feletti fájlokra és üzenet, ha a fájl olvasása sikertelen.
+- Mobil: nincs 12 px alatti szöveg, az érintési célpontok legalább 24 px-esek (WCAG 2.5.8).
+
 ### 7.2.0 — 2026. október 14.
 - Keresés a táblázatban relevancia szerint (FFF.search), a kézi rendezés megtartásával.
 - „Személyes adatok”: helyi vizsgálat és maszkolt CSV-export (FFF.pii).

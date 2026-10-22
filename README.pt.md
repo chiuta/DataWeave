@@ -2,7 +2,7 @@
 
 [English](README.md) · [Română](README.ro.md) · [Français](README.fr.md) · [Italiano](README.it.md) · [Español](README.es.md) · **Português** · [Deutsch](README.de.md) · [Magyar](README.hu.md)
 
-**Versão:** 7.3.2 · **Última atualização:** 2026-10-22
+**Versão:** 7.3.3 · **Última atualização:** 2026-10-22
 
 Idiomas da interface: **Română, English, Français, Italiano, Español, Português (PT), Deutsch, Magyar**
 
@@ -62,6 +62,10 @@ Descarregue `index.html` e abra-o no navegador; não precisa de internet.
 
 - 7.3.2 — 2026-10-22: **correção**: os conjuntos de dados de demonstração, os chips de exemplo, o exemplo de colagem, os contadores vazios de linhas/colunas e os rótulos do seletor de idioma seguem agora o idioma escolhido.
 - 7.3.1 — 2026-10-22: **correção**: o título da página segue agora o idioma escolhido.
+### 7.3.3 — 2026-10-22
+- Indicador «Dados em memória» junto das informações do ficheiro (tamanho do texto carregado; memória JS do separador na dica, se o navegador a indicar), aviso para ficheiros com mais de 50 MB e mensagem se a leitura falhar.
+- Telemóvel: nenhum texto abaixo de 12 px e áreas táteis de pelo menos 24 px (WCAG 2.5.8).
+
 ### 7.2.0 — 14 de outubro de 2026
 - Pesquisa na tabela por relevância (FFF.search), mantendo a ordenação manual.
 - «Dados pessoais»: análise local e exportação CSV mascarada (FFF.pii).

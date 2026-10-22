@@ -2,7 +2,7 @@
 
 **English** · [Română](README.ro.md) · [Français](README.fr.md) · [Italiano](README.it.md) · [Español](README.es.md) · [Português](README.pt.md) · [Deutsch](README.de.md) · [Magyar](README.hu.md)
 
-**Version:** 7.3.2 · **Last updated:** 2026-10-22
+**Version:** 7.3.3 · **Last updated:** 2026-10-22
 
 Interface languages: **Română, English, Français, Italiano, Español, Português (PT), Deutsch, Magyar**
 
@@ -62,6 +62,10 @@ Download `index.html` and open it in a browser; it does not need internet.
 
 - 7.3.2 — 2026-10-22: **fix**: demo datasets, sample chips, paste example, empty row/column counters and language-selector labels now follow the selected language.
 - 7.3.1 — 2026-10-22: **fix**: the page title now follows the selected language.
+### 7.3.3 — 2026-10-22
+- A "Data in memory" indicator next to the file info (loaded text size; the tab's JS memory in the tooltip when the browser reports it), a warning for files over 50 MB and a message if reading the file fails.
+- Mobile: no text below 12 px and touch targets of at least 24 px (WCAG 2.5.8).
+
 ### 7.2.0 — 14 October 2026
 - Table search by relevance (FFF.search), keeping manual sorting.
 - "Personal data": local scan and masked CSV export (FFF.pii).
