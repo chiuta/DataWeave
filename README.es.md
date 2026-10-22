@@ -2,7 +2,7 @@
 
 [English](README.md) · [Română](README.ro.md) · [Français](README.fr.md) · [Italiano](README.it.md) · **Español** · [Português](README.pt.md) · [Deutsch](README.de.md) · [Magyar](README.hu.md)
 
-**Versión:** 7.3.4 · **Última actualización:** 2026-10-22
+**Versión:** 7.3.5 · **Última actualización:** 2026-10-22
 
 Idiomas de la interfaz: **Română, English, Français, Italiano, Español, Português (PT), Deutsch, Magyar**
 
@@ -60,6 +60,7 @@ Descarga `index.html` y ábrelo en el navegador; no necesita internet.
 
 ## Historial / Changelog
 
+- 7.3.5 — 2026-10-22: fff-kit 1.1.4: objetivos táctiles y tamaño mínimo de texto
 - 7.3.4 — 2026-10-22: fff-kit 1.1.2: PBKDF2 600 000 iteraciones, protección anti-clickjacking
 - 7.3.2 — 2026-10-22: **corrección**: los conjuntos de datos de demostración, los chips de ejemplo, el ejemplo de pegado, los contadores vacíos de filas/columnas y las etiquetas del selector de idioma siguen ahora el idioma elegido.
 - 7.3.1 — 2026-10-22: **corrección**: el título de la página sigue ahora el idioma elegido.

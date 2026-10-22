@@ -2,7 +2,7 @@
 
 [English](README.md) · [Română](README.ro.md) · [Français](README.fr.md) · **Italiano** · [Español](README.es.md) · [Português](README.pt.md) · [Deutsch](README.de.md) · [Magyar](README.hu.md)
 
-**Versione:** 7.3.4 · **Ultimo aggiornamento:** 2026-10-22
+**Versione:** 7.3.5 · **Ultimo aggiornamento:** 2026-10-22
 
 Lingue dell'interfaccia: **Română, English, Français, Italiano, Español, Português (PT), Deutsch, Magyar**
 
@@ -61,6 +61,7 @@ Scarica `index.html` e aprilo nel browser; non ha bisogno di internet.
 
 ## Cronologia / Changelog
 
+- 7.3.5 — 2026-10-22: fff-kit 1.1.4: target touch e dimensione minima del testo
 - 7.3.2 — 2026-10-22: **correzione**: i dataset dimostrativi, i chip di esempio, l’esempio di incolla, i contatori vuoti di righe/colonne e le etichette del selettore di lingua seguono ora la lingua scelta.
 - 7.3.1 — 2026-10-22: **correzione**: il titolo della pagina segue ora la lingua scelta.
 ### 7.3.3 — 2026-10-22
