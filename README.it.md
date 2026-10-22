@@ -2,7 +2,7 @@
 
 [English](README.md) · [Română](README.ro.md) · [Français](README.fr.md) · **Italiano** · [Español](README.es.md) · [Português](README.pt.md) · [Deutsch](README.de.md) · [Magyar](README.hu.md)
 
-**Versione:** 7.3.0 · **Ultimo aggiornamento:** 2026-10-19
+**Versione:** 7.3.1 · **Ultimo aggiornamento:** 2026-10-22
 
 Lingue dell'interfaccia: **Română, English, Français, Italiano, Español, Português (PT), Deutsch, Magyar**
 
@@ -60,6 +60,7 @@ Scarica `index.html` e aprilo nel browser; non ha bisogno di internet.
 
 ## Cronologia / Changelog
 
+- 7.3.1 — 2026-10-22: **correzione**: il titolo della pagina segue ora la lingua scelta.
 ### 7.2.0 — 14 ottobre 2026
 - Ricerca nella tabella per rilevanza (FFF.search), con conservazione dell'ordinamento manuale.
 - «Dati personali»: scansione locale ed esportazione CSV mascherata (FFF.pii).

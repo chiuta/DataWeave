@@ -2,7 +2,7 @@
 
 [English](README.md) · [Română](README.ro.md) · [Français](README.fr.md) · [Italiano](README.it.md) · **Español** · [Português](README.pt.md) · [Deutsch](README.de.md) · [Magyar](README.hu.md)
 
-**Versión:** 7.3.0 · **Última actualización:** 2026-10-19
+**Versión:** 7.3.1 · **Última actualización:** 2026-10-22
 
 Idiomas de la interfaz: **Română, English, Français, Italiano, Español, Português (PT), Deutsch, Magyar**
 
@@ -60,6 +60,7 @@ Descarga `index.html` y ábrelo en el navegador; no necesita internet.
 
 ## Historial / Changelog
 
+- 7.3.1 — 2026-10-22: **corrección**: el título de la página sigue ahora el idioma elegido.
 ### 7.2.0 — 14 de octubre de 2026
 - Búsqueda en la tabla por relevancia (FFF.search), conservando la ordenación manual.
 - «Datos personales»: análisis local y exportación CSV enmascarada (FFF.pii).
