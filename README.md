@@ -2,7 +2,7 @@
 
 **English** · [Română](README.ro.md) · [Français](README.fr.md) · [Italiano](README.it.md) · [Español](README.es.md) · [Português](README.pt.md) · [Deutsch](README.de.md) · [Magyar](README.hu.md)
 
-**Version:** 7.3.8 · **Last updated:** 2026-10-26
+**Version:** 8.0.0 · **Last updated:** 2026-10-26
 
 Interface languages: **Română, English, Français, Italiano, Español, Português (PT), Deutsch, Magyar**
 
@@ -59,6 +59,13 @@ DataWeave is a single-file HTML application for exploring CSV, TSV and JSON file
 Download `index.html` and open it in a browser; it does not need internet.
 
 ## History / Changelog
+
+### 8.0.0 — 2026-10-26
+
+- **Reproducible notebook** (new "Notebook" tab): every filter, "Remove duplicates", "Trim whitespace", computed column, type change, hide/reorder columns, sort and pivot is recorded as a step. Steps can be disabled, reordered, edited (filter value, formula) and deleted, with an immediate re-run on the loaded data.
+- **Apply to another file…**: steps are re-run on another CSV/TSV/JSON (columns match by name; steps that do not apply are skipped and explained). **Notebook `.json` export/import** (no data), **JS script export** (Node 18+, no dependencies: it embeds the app's own functions, so it yields the same CSV; a pivot goes to a second CSV) and **SQL export** (CTE chain, PostgreSQL/standard; formulas without an SQL equivalent are marked TODO).
+- Fixes: the app's CSV exports started with a `BOM` plus a comma (an empty leading header column); now just the `BOM`. "Remove duplicates" now keeps the raw source aligned (changing a column's type after deduplication gave wrong values).
+- Limits: no joins between files; the loaded file text stays in page memory for re-runs (not saved).
 
 - 7.3.5 — 2026-10-22: fff-kit 1.1.4: touch targets and minimum text size
 - 7.3.4 — 2026-10-22: fff-kit 1.1.2: PBKDF2 600,000 iterations, anti-clickjacking protection

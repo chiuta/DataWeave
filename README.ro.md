@@ -2,7 +2,7 @@
 
 [English](README.md) · **Română** · [Français](README.fr.md) · [Italiano](README.it.md) · [Español](README.es.md) · [Português](README.pt.md) · [Deutsch](README.de.md) · [Magyar](README.hu.md)
 
-**Versiune:** 7.3.8 · **Ultima actualizare:** 2026-10-26
+**Versiune:** 8.0.0 · **Ultima actualizare:** 2026-10-26
 
 Limbile interfeței: **Română, English, Français, Italiano, Español, Português (PT), Deutsch, Magyar**
 
@@ -59,6 +59,13 @@ DataWeave este o aplicație HTML dintr-un singur fișier pentru explorarea fiși
 Descarcă `index.html` și deschide-l în browser; nu are nevoie de internet.
 
 ## Istoric / Changelog
+
+### 8.0.0 — 2026-10-26
+
+- **Caiet reproductibil** (fila nouă „Caiet”): fiecare filtru, „Elimină duplicate”, „Curăță spații”, coloană calculată, schimbare de tip, ascundere/ordine de coloane, sortare și pivot se înregistrează ca pas. Pașii se pot dezactiva, reordona, edita (valoarea filtrului, formula) și șterge, cu re-rulare imediată pe datele încărcate.
+- **Aplică pe alt fișier…**: pașii se re-rulează pe alt CSV/TSV/JSON (coloanele se potrivesc după nume; pașii care nu se aplică sunt săriți explicați). **Export/import caiet `.json`** (fără date), **export script JS** (Node 18+, fără dependențe: conține chiar funcțiile aplicației, deci dă același CSV; pivotul merge într-un al doilea CSV) și **export SQL** (lanț de CTE-uri, PostgreSQL/standard; formulele fără echivalent SQL sunt marcate TODO).
+- Corecție: exporturile CSV ale aplicației începeau cu `BOM` + virgulă (antet cu o coloană goală în față); acum doar cu `BOM`. „Elimină duplicate” păstrează acum și sursa brută aliniată (schimbarea tipului după deduplicare dădea valori greșite).
+- Limite: nu există joncțiuni între fișiere; textul fișierului încărcat rămâne în memoria paginii pentru re-rulare (nu se salvează).
 
 - 7.3.5 — 2026-10-22: fff-kit 1.1.4: ținte tactile și text minim
 - 7.3.4 — 2026-10-22: fff-kit 1.1.2: PBKDF2 600 000 iterații, protecție anti-clickjacking
