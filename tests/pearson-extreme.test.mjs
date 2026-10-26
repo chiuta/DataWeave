@@ -10,7 +10,7 @@ const check = (n, c, x) => { if (c) { passes++; console.log("  ok  " + n); } els
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "dw-"));
 const csv = path.join(tmp, "big.csv");
 fs.writeFileSync(csv, "x,y\n1e200,1e200\n2e200,4e200\n3e200,9e200\n4e200,16e200\n");
-const browser = await chromium.launch({executablePath: "/opt/pw-browsers/chromium"});
+const browser = await chromium.launch({executablePath: process.env.CHROMIUM_PATH || undefined});
 const ctx = await browser.newContext({viewport: {width: 390, height: 800}});
 await ctx.route(/^https?:/, r => r.abort());
 const page = await ctx.newPage();
