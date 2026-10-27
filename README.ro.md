@@ -2,7 +2,9 @@
 
 [English](README.md) · **Română** · [Français](README.fr.md) · [Italiano](README.it.md) · [Español](README.es.md) · [Português](README.pt.md) · [Deutsch](README.de.md) · [Magyar](README.hu.md)
 
-**Versiune:** 8.0.0 · **Ultima actualizare:** 2026-10-26
+**Versiune:** 8.1.0 · **Ultima actualizare:** 2026-10-27
+
+**Stare:** stabil · **Offline:** complet
 
 Limbile interfeței: **Română, English, Français, Italiano, Español, Português (PT), Deutsch, Magyar**
 
@@ -29,6 +31,10 @@ DataWeave este o aplicație HTML dintr-un singur fișier pentru explorarea fiși
 - „Salvează sesiune" / „Încarcă sesiune"; export statistici, JSON, CSV; grafice ca SVG sau PNG.
 - Coloană calculată cu operatori aritmetici, comparații, ternar și funcții (sqrt, log, log10, abs, round, floor, ceil, min, max, pow, exp, sin, cos, pi), evaluate fără `eval`.
 - Temă luminoasă/întunecată (butonul ☾) și interfață în 7 limbi: English, Română, Français, Italiano, Español, Português, Deutsch.
+- **Import Excel, `.xlsx` / `.xlsm` (8.1.0):** tragi sau alegi un registru; se citește prima foaie *vizibilă*, formulele arată ultima valoare calculată, iar datele calendaristice sunt recunoscute din stilurile celulelor. Citirea se face în întregime în browser, cu un cititor compact (ZIP prin `DecompressionStream`, XML prin `DOMParser`); fără bibliotecă, fără rețea. Vechiul `.xls`, fișierele protejate cu parolă și **Parquet nu sunt acceptate** (Parquet este *planificat*: un cititor compact ar cere decodare Thrift + Snappy).
+- **Test de performanță (8.1.0):** `tests/perf.test.mjs` generează în pagină CSV-uri sintetice (8 coloane) și măsoară încărcarea și trecerea între file. Rulare orientativă pe un container partajat cu 2 vCPU și încărcare foarte mare (load average ≈ 37, deci valorile sunt maxime; repetă pe calculatorul tău): 50 000 de rânduri (2,4 MB) ≈ 7 s la încărcare; 200 000 (9,8 MB) ≈ 15 s; 500 000 (24,9 MB) ≈ 32 s, cu memorie JS în jur de 290 MB; filele Statistici și Corelații cresc aproximativ liniar cu numărul de rânduri. **Parsarea și inferența tipurilor rulează pe firul principal (fără Web Worker sau streaming deocamdată - planificat)**, deci pagina nu răspunde cât timp se încarcă un fișier mare.
+- Cale rapidă la parsarea numerelor (rezultate identice, verificate de test pe 9 000 de șiruri) și mențiunea `.xlsx` în zona de tragere.
+- Exportul graficelor în SVG/PNG exista deja („⬇ SVG” / „⬇ PNG”).
 
 ## Funcții noi (7.2.0)
 
@@ -59,6 +65,12 @@ DataWeave este o aplicație HTML dintr-un singur fișier pentru explorarea fiși
 Descarcă `index.html` și deschide-l în browser; nu are nevoie de internet.
 
 ## Istoric / Changelog
+
+### 8.1.0 — 2026-10-27
+- Import Excel (`.xlsx`/`.xlsm`, prima foaie vizibilă) cu un cititor compact, fără dependențe.
+- Test de performanță `tests/perf.test.mjs` cu cifre orientative în README; cale rapidă la parsarea numerelor.
+- Nefăcut: Parquet (planificat), Web Worker / streaming (planificat), vechiul `.xls`.
+- Existent deja: exportul graficelor în SVG/PNG. Test nou: `tests/xlsx.test.mjs`.
 
 ### 8.0.0 — 2026-10-26
 

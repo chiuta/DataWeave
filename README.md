@@ -2,7 +2,9 @@
 
 **English** · [Română](README.ro.md) · [Français](README.fr.md) · [Italiano](README.it.md) · [Español](README.es.md) · [Português](README.pt.md) · [Deutsch](README.de.md) · [Magyar](README.hu.md)
 
-**Version:** 8.0.0 · **Last updated:** 2026-10-26
+**Version:** 8.1.0 · **Last updated:** 2026-10-27
+
+**Status:** stable · **Offline:** complete
 
 Interface languages: **Română, English, Français, Italiano, Español, Português (PT), Deutsch, Magyar**
 
@@ -14,7 +16,7 @@ A workshop for visualising and analysing tabular data, right in the browser.
 
 ## What it is
 
-DataWeave is a single-file HTML application for exploring CSV, TSV and JSON files: table, statistics, charts, pivot table and correlations. It is designed, as the app puts it, for journalists, researchers and teachers; your data stays on your device.
+DataWeave is a single-file HTML application for exploring CSV, TSV, JSON and Excel (.xlsx) files: table, statistics, charts, pivot table and correlations. It is designed, as the app puts it, for journalists, researchers and teachers; your data stays on your device.
 
 ## Features
 
@@ -29,6 +31,10 @@ DataWeave is a single-file HTML application for exploring CSV, TSV and JSON file
 - "Save session" / "Load session"; export of statistics, JSON, CSV; charts as SVG or PNG.
 - Computed column with arithmetic operators, comparisons, ternary and functions (sqrt, log, log10, abs, round, floor, ceil, min, max, pow, exp, sin, cos, pi), evaluated without `eval`.
 - Light/dark theme (the ☾ button) and interface in 7 languages: English, Română, Français, Italiano, Español, Português, Deutsch.
+- **Excel import, `.xlsx` / `.xlsm` (8.1.0):** drag or choose a workbook; the first *visible* sheet is read, formulas show their last calculated value, dates are detected from the cell styles. Read entirely in the browser by a compact reader (ZIP via `DecompressionStream`, XML via `DOMParser`); no library, no network. Old `.xls`, password-protected files and **Parquet are not supported** (Parquet is *planned*: a compact reader would need Thrift + Snappy decoding).
+- **Performance test (8.1.0):** `tests/perf.test.mjs` generates synthetic CSVs (8 columns) in the page and measures loading and tab switching. Indicative run on a shared 2-vCPU container with a very high load (load average ≈ 37, so these are upper bounds; repeat on your machine): 50,000 rows (2.4 MB) ≈ 7 s to load; 200,000 rows (9.8 MB) ≈ 15 s; 500,000 rows (24.9 MB) ≈ 32 s, with JS memory around 290 MB; the Statistics and Correlations tabs grow roughly linearly with the rows. **Parsing and type inference run on the main thread (no Web Worker or streaming yet - planned)**, so the page is unresponsive while a large file loads.
+- A fast path in number parsing (identical results, checked on 9,000 strings by the test) and the `.xlsx` note in the drop zone.
+- Chart export as SVG/PNG already existed ("⬇ SVG" / "⬇ PNG").
 
 ## New features (7.2.0)
 
@@ -59,6 +65,12 @@ DataWeave is a single-file HTML application for exploring CSV, TSV and JSON file
 Download `index.html` and open it in a browser; it does not need internet.
 
 ## History / Changelog
+
+### 8.1.0 — 2026-10-27
+- Excel import (`.xlsx`/`.xlsm`, first visible sheet) with a compact, dependency-free reader.
+- Performance test `tests/perf.test.mjs` with indicative numbers in the README; fast path in number parsing.
+- Not done: Parquet (planned), Web Worker / streaming (planned), old `.xls`.
+- Already present: chart export to SVG/PNG. New test: `tests/xlsx.test.mjs`.
 
 ### 8.0.0 — 2026-10-26
 
