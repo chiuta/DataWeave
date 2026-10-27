@@ -2,7 +2,7 @@
 
 **English** · [Română](README.ro.md) · [Français](README.fr.md) · [Italiano](README.it.md) · [Español](README.es.md) · [Português](README.pt.md) · [Deutsch](README.de.md) · [Magyar](README.hu.md)
 
-**Version:** 8.1.0 · **Last updated:** 2026-10-27
+**Version:** 8.2.0 · **Last updated:** 2026-10-27
 
 **Status:** stable · **Offline:** complete
 
@@ -31,7 +31,9 @@ DataWeave is a single-file HTML application for exploring CSV, TSV, JSON and Exc
 - "Save session" / "Load session"; export of statistics, JSON, CSV; charts as SVG or PNG.
 - Computed column with arithmetic operators, comparisons, ternary and functions (sqrt, log, log10, abs, round, floor, ceil, min, max, pow, exp, sin, cos, pi), evaluated without `eval`.
 - Light/dark theme (the ☾ button) and interface in 7 languages: English, Română, Français, Italiano, Español, Português, Deutsch.
-- **Excel import, `.xlsx` / `.xlsm` (8.1.0):** drag or choose a workbook; the first *visible* sheet is read, formulas show their last calculated value, dates are detected from the cell styles. Read entirely in the browser by a compact reader (ZIP via `DecompressionStream`, XML via `DOMParser`); no library, no network. Old `.xls`, password-protected files and **Parquet are not supported** (Parquet is *planned*: a compact reader would need Thrift + Snappy decoding).
+- **Excel import, `.xlsx` / `.xlsm` (8.1.0):** drag or choose a workbook; the first *visible* sheet is read, formulas show their last calculated value, dates are detected from the cell styles. Read entirely in the browser by a compact reader (ZIP via `DecompressionStream`, XML via `DOMParser`); no library, no network. Password-protected files are not supported.
+- **Old Excel `.xls` (Excel 97-2003, BIFF8) (8.2.0):** read by a hand-written OLE2/BIFF8 reader (first visible sheet, text, numbers, RK, booleans, cached formula values, dates from the number formats, 1900/1904 systems). **Not read:** password-encrypted files (clear message), BIFF2-5 files (Excel 95 and older; clear message), macro/chart sheets. Tested only with files produced by LibreOffice (`MS Excel 97` filter), **not with files written by Microsoft Excel itself**; the encrypted/BIFF5 cases are simulated by editing one byte (detection only).
+- **Parquet `.parquet` (8.2.0):** flat tables (no lists/maps/structs), data pages v1 and v2, encodings PLAIN, dictionary and RLE (booleans), compression **uncompressed, SNAPPY and GZIP**. Types: booleans, int32/int64 (exact, via BigInt), float/double, text, date, timestamp (ms/µs/ns, shown in UTC), decimal, INT96. **Not read (clear message):** ZSTD/LZ4/BROTLI/LZO compression, DELTA_* and BYTE_STREAM_SPLIT encodings, nested columns, encrypted files. Tested with files written by pyarrow 26 (not with Spark/DuckDB/Hive output); the whole file is read into memory (no streaming).
 - **Performance test (8.1.0):** `tests/perf.test.mjs` generates synthetic CSVs (8 columns) in the page and measures loading and tab switching. Indicative run on a shared 2-vCPU container with a very high load (load average ≈ 37, so these are upper bounds; repeat on your machine): 50,000 rows (2.4 MB) ≈ 7 s to load; 200,000 rows (9.8 MB) ≈ 15 s; 500,000 rows (24.9 MB) ≈ 32 s, with JS memory around 290 MB; the Statistics and Correlations tabs grow roughly linearly with the rows. **Parsing and type inference run on the main thread (no Web Worker or streaming yet - planned)**, so the page is unresponsive while a large file loads.
 - A fast path in number parsing (identical results, checked on 9,000 strings by the test) and the `.xlsx` note in the drop zone.
 - Chart export as SVG/PNG already existed ("⬇ SVG" / "⬇ PNG").
@@ -65,6 +67,9 @@ DataWeave is a single-file HTML application for exploring CSV, TSV, JSON and Exc
 Download `index.html` and open it in a browser; it does not need internet.
 
 ## History / Changelog
+
+### 8.2.0 — 2026-10-27
+- Import of old Excel `.xls` (BIFF8) and Parquet (flat tables; uncompressed/Snappy/GZIP; PLAIN/dictionary) with hand-written readers, no library; clear messages for what is not read. Tests: `tests/xls-parquet.test.mjs` (38 checks, fixtures made with LibreOffice and pyarrow). Chart export to SVG/PNG already existed.
 
 ### 8.1.0 — 2026-10-27
 - Excel import (`.xlsx`/`.xlsm`, first visible sheet) with a compact, dependency-free reader.
