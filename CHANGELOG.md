@@ -2,6 +2,17 @@
 
 Format: [SemVer](https://semver.org/lang/ro/) (MAJOR.MINOR.PATCH). Istoricul complet al versiunilor anterioare este în secțiunea „Istoric / Changelog” din [README.ro.md](README.ro.md).
 
+## 8.2.1 — 2026-10-28
+
+### Corectat
+- Parquet: coloanele întregi **fără semn** (`uint32`, `uint64`; tipurile logice INTEGER cu `isSigned=false` și tipurile convertite UINT_*) erau afișate cu semn (ex. `4294967295` apărea `-1`, `2^64-1` apărea `-1`). Descoperit cu fișiere generate de pyarrow 26; acoperit de testele noi.
+
+### Adăugat (teste)
+- Fixture-uri sintetice noi în `tests/fixtures/` (xlwt 1.3.0, LibreOffice 24.2, pyarrow 26, fastparquet 2026.9.0), descrise în `tests/fixtures/README.md`, și `tests/fixtures-real.test.mjs`. Nu sunt produse de Microsoft Excel.
+
+### Limite documentate (neschimbate)
+- Timestamp-urile microsecunde/nanosecunde sunt trunchiate la milisecunde; tipurile TIME (afișate ca întreg brut) și Float16 (octeți în hex) nu sunt formatate; o primă foaie goală dă eroare „gol” chiar dacă a doua are date.
+
 ## 8.2.0 — 2026-10-27
 
 ### Adăugat
