@@ -2,8 +2,8 @@
   "schema": 1,
   "slug": "dataweave",
   "name": "DataWeave — atelier de date offline",
-  "version": "8.4.1",
-  "updated": "2026-11-15",
+  "version": "8.4.2",
+  "updated": "2026-11-17",
   "description": "Drag a CSV or JSON into the page and get instant interactive charts, pivot tables and descriptive statistics. No server, no account, no telemetry. One HTML file.",
   "egress": [],
   "permissions": [
@@ -15,8 +15,8 @@
     "BroadcastChannel"
   ],
   "storageKeys": [],
-  "sizeBytes": 876165,
-  "sha256": "f28d7de0d021efba02e02d0603aad0776ac9eef6e80f17a7e97f182cb63b4a25",
+  "sizeBytes": 944074,
+  "sha256": "5b1e5d72659805220f02b932e026a1cd0007cd46a812db0ed634bea272571ef1",
   "csp": {
     "present": true,
     "directives": {
@@ -29,7 +29,7 @@
       "base-uri": "'self'",
       "form-action": "'self'",
       "worker-src": "'self'",
-      "script-src": "'self' sha256×9",
+      "script-src": "'self' sha256×11",
       "connect-src": "'none'",
       "manifest-src": "'self'"
     },
@@ -74,7 +74,7 @@
     ]
   },
   "kit": {
-    "version": "1.7.0",
+    "version": "1.8.0",
     "modules": [
       "core",
       "store",
